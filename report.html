@@ -134,7 +134,7 @@ async function api(params,body){
   /* 網路失敗自動重試（最多 4 次，間隔隨機錯開，避免大家一起撞）。送出票數帶有 reqid，重送不會重複計算。 */
   let lastErr;
   for(let i=0;i<4;i++){
-    const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),20000);
+    const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),(body&&body.action==='submit')?75000:20000);   // 送出票數可能排隊，等久一點
     try{
       let r;
       if(body) r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal:ctl.signal});
@@ -379,7 +379,9 @@ async function send(){
   const body={action:'submit',votes:v,invalid:invalid===''?0:Number(invalid),declared:declared,reqid:reqid,blanks:me.cands.filter(c=>vals[c.no]==='').map(c=>c.no)};
   if(ADM_STATION){body.admin=ADM;body.station=me.station.id;} else body.k=K;
   try{
-    const r=await api(null,body);
+    let r=await api(null,body);
+    // 後端排隊太久回「系統忙碌」→ 自動重試（同一個請求代碼，不會重複計算），不用志工再按
+    for(let t=0;t<4&&!r.ok&&/忙碌/.test(r.error||'');t++){ btn.textContent='系統較忙，自動重試中…'; await new Promise(x=>setTimeout(x,3000+Math.random()*4000)); r=await api(null,body); }
     if(!r.ok){ $('msg').innerHTML=`<div class="banner b-red">${esc(r.error||'送出失敗')}</div>`; btn.disabled=false; btn.textContent='再試一次'; if(/超過合理|不正確|都是 0/.test(r.error||''))reqid=''; return; }
     try{localStorage.removeItem('draft_'+me.station.id);}catch(e){}
     renderDone(r);
