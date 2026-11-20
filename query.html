@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>中壢區議員開票即時</title>
+<meta name="description" content="桃園市議員選舉中壢區（第7選舉區）開票即時進度與各候選人得票，志工現場回報，非官方結果。">
+<meta property="og:title" content="中壢區議員開票即時">
+<meta property="og:description" content="開票進度、各候選人得票、各里得票查詢，即時更新。">
+<style>
+:root{
+  --bg:#efe9dd; --card:#faf7f1; --ink:#38332c; --mute:#7c7467; --line:#d9cfbe; --track:#e4dccd;
+  --g:#16934a; --gdeep:#0f7a3b; --gsoft:#dff3e6; --kmt:#1f6fd6; --oth:#6f7b87; --othsoft:#e8ebee;
+  --amb:#8a6500; --ambbg:#fbf1c9; --red:#b3261e; --redbg:#fdecea; --seat:#c49a2c;
+}
+.cr.p-dpp .bd{background:var(--g);color:#fff}.cr.p-kmt .bd{background:var(--kmt);color:#fff}.cr.p-ind .bd{background:var(--oth);color:#fff}
+.cr.p-dpp .tr i{background:var(--g)}.cr.p-kmt .tr i{background:var(--kmt)}.cr.p-ind .tr i{background:var(--oth)}
+.dr.p-dpp .mb i{background:var(--g)}.dr.p-kmt .mb i{background:var(--kmt)}.dr.p-ind .mb i{background:var(--oth)}
+.tvlink{display:inline-block;margin:10px 0 0 8px;font-size:13px;color:var(--gdeep);text-decoration:none;border:1px solid var(--gdeep);border-radius:99px;padding:3px 12px}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px 40px}
+header.hero{background:#f7f3ec;color:var(--ink);border-bottom:2px solid #d3c9b8;padding:calc(18px + env(safe-area-inset-top)) 16px 20px}
+header.hero .in{max-width:860px;margin:0 auto}
+h1{margin:0;font-size:clamp(22px,5.2vw,32px);line-height:1.25;letter-spacing:.5px}
+.sub{color:var(--mute);font-size:14px;margin-top:2px}
+.pill{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:rgba(60,50,35,.08);border-radius:99px;padding:4px 12px;font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--g);animation:pulse 1.6s infinite}
+.pill.stale .dot{background:var(--seat);animation:none}
+@keyframes pulse{50%{opacity:.25}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+.card h2{margin:0 0 2px;font-size:18px}
+.card .cap{font-size:13px;color:var(--mute);margin-bottom:12px}
+.prog{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.prog .big{font-size:clamp(40px,11vw,60px);font-weight:800;color:var(--g);font-variant-numeric:tabular-nums;line-height:1}
+.prog .of{font-size:18px;color:var(--mute)}
+.prog .pct{margin-left:auto;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.pbar{height:14px;border-radius:99px;background:var(--track);margin:12px 0 10px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--g);border-radius:99px;transition:width .8s}
+.stats{display:flex;gap:22px;flex-wrap:wrap;font-size:14px;color:var(--mute)}
+.stats b{color:var(--ink);font-size:16px;font-variant-numeric:tabular-nums}
+.tools{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.seg{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font-size:14px;cursor:pointer}
+.seg.on{background:var(--g);border-color:var(--g);color:#fff}
+.cr{padding:10px 0;border-top:1px solid var(--line)}
+.cr:first-of-type{border-top:0}
+.cr .l1{display:flex;align-items:center;gap:8px}
+.rk{width:26px;text-align:center;font-weight:700;color:var(--mute);font-variant-numeric:tabular-nums}
+.bd{min-width:30px;height:26px;border-radius:7px;background:var(--othsoft);color:var(--ink);font-weight:800;display:inline-flex;align-items:center;justify-content:center;font-size:14px;padding:0 5px}
+.cr.ours .bd{background:var(--g);color:#fff}
+.cn{font-size:18px;font-weight:700}
+.pt{font-size:12px;color:var(--mute);margin-left:2px}
+.star{font-size:11px;background:var(--gsoft);color:var(--g);border-radius:5px;padding:1px 6px;font-weight:700}
+.vt{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums}
+.vt b{font-size:20px}
+.vt span{display:block;font-size:12px;color:var(--mute);line-height:1.1}
+.tr{height:12px;background:var(--track);border-radius:99px;margin:7px 0 0 34px;overflow:hidden}
+.tr i{display:block;height:100%;background:var(--oth);border-radius:99px;transition:width .8s}
+.cr.ours .tr i{background:var(--g)}
+.seatline{display:flex;align-items:center;gap:8px;color:var(--seat);font-size:12.5px;font-weight:700;margin:6px 0}
+.seatline:before,.seatline:after{content:"";flex:1;border-top:2px dashed var(--seat);opacity:.7}
+.note{background:var(--ambbg);color:var(--amb);border-radius:10px;padding:9px 12px;font-size:13.5px;margin-top:12px}
+svg text{font-family:inherit}
+.sel{width:100%;height:44px;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:0 10px;margin-bottom:10px}
+.sr{display:grid;grid-template-columns:78px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
+.sr:first-of-type{border-top:0}
+.sr .nm{font-weight:600}.sr .nm small{display:block;color:var(--mute);font-weight:400;font-size:12px}
+.sr .num{text-align:right;font-variant-numeric:tabular-nums}.sr .num b{font-size:16px}.sr .num small{display:block;color:var(--mute);font-size:11.5px}
+.sr .mb{height:10px;background:var(--track);border-radius:99px;overflow:hidden;grid-column:2}
+.sr .mb i{display:block;height:100%;background:var(--g);border-radius:99px}
+.sr.none{opacity:.5}
+.q{width:100%;height:46px;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:0 12px}
+.res{margin-top:8px}
+.res button{display:flex;width:100%;text-align:left;gap:10px;align-items:center;padding:10px 6px;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:inherit;cursor:pointer}
+.res button:first-child{border-top:0}
+.tag{font-size:11.5px;border-radius:5px;padding:1px 7px;background:var(--othsoft);color:var(--mute);white-space:nowrap}
+.tag.g{background:var(--gsoft);color:var(--g)}
+.det{margin-top:14px;border-top:2px solid var(--g);padding-top:12px}
+.det h3{margin:0 0 2px;font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:12.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chip.done{background:var(--gsoft);border-color:var(--g);color:var(--g)}
+.dr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:6px 0;border-top:1px solid var(--line);font-size:15px}
+.dr:first-of-type{border-top:0}
+.dr .mb{grid-column:1/3;height:8px;background:var(--track);border-radius:99px;overflow:hidden}
+.dr .mb i{display:block;height:100%;background:var(--oth)}
+.dr.ours .mb i{background:var(--g)}
+.dr .v{font-variant-numeric:tabular-nums;font-weight:700}
+.more{display:block;margin:8px auto 0;border:0;background:none;color:var(--g);font:inherit;font-weight:700;cursor:pointer;padding:6px}
+.empty{color:var(--mute);text-align:center;padding:20px 8px;font-size:14.5px}
+.closed{text-align:center;padding:26px 10px}
+.closed .t{font-size:22px;font-weight:800;margin:6px 0}
+.demo{background:#b9770e;color:#fff;text-align:center;font-size:13px;padding:5px}
+footer{color:var(--mute);font-size:12.5px;padding:6px 4px 30px;line-height:1.7}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="demo" class="demo hide">示範資料（假數字）：僅供預覽版面，正式上線後會顯示志工回報的真實票數</div>
+<header class="hero"><div class="in">
+  <h1 id="title">中壢區議員開票即時</h1>
+  <div class="sub" id="sub"></div>
+  <div class="pill" id="pill"><span class="dot"></span><span id="pilltxt">連線中…</span></div><a class="tvlink" href="index.html?tv=1">電視版面 ▸</a>
+</div></header>
+
+<div class="wrap" id="root">
+  <div class="card empty">載入中…</div>
+</div>
+<div class="wrap" style="padding-top:0"><footer id="foot">
+  ※ 本頁數字由志工於各投開票所現場回報、彙整，<b>非官方開票結果</b>，可能因回報時差或人工誤差與正式結果不同；正式結果以中央選舉委員會公告為準。<br>
+  ※ 「暫列前 N 名」僅依目前已回報票數排序，尚有投開票所未開出，名次會持續變動，不代表當選。
+</footer></div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+(function(){
+const API=(window.ELECTION_API||'').trim(); const DEMO=!API;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Number(n).toLocaleString('zh-TW');
+const pct=(a,b)=>b>0?(a/b*100):0;
+const p1=x=>x.toFixed(1)+'%';
+const pad=n=>String(n).padStart(4,'0');
+const pcls=p=>/民進/.test(p)?'p-dpp':/國民/.test(p)?'p-kmt':'p-ind';
+const pcol=p=>/民進/.test(p)?'var(--g)':/國民/.test(p)?'var(--kmt)':'var(--oth)';
+const hms=t=>{const d=new Date(t);return [d.getHours(),d.getMinutes(),d.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':')};
+const hm=t=>hms(t).slice(0,5);
+
+let D=null, lastOk=0, failing=false;
+const ST={sort:'votes',tab:'li',candNo:null,liFilter:'',liAll:false,q:'',sel:null};
+
+/* ---------- 示範資料 ---------- */
+let demoState=null;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function demoMake(){
+  const R=rng(20261128), dd=window.DEMO_DATA;
+  const w=dd.cands.map(c=>c.ours?1.3+R()*0.8:0.5+R()*1.3);
+  const liBias={};
+  const order=dd.stations.map((s,i)=>i).sort(()=>R()-.5);
+  const stations=dd.stations.map(s=>{
+    if(!(s[1] in liBias)) liBias[s[1]]=dd.cands.map(()=>0.6+R()*0.9);
+    const tot=650+Math.floor(R()*650), ws=w.map((x,i)=>x*liBias[s[1]][i]*(0.7+R()*0.6)), sw=ws.reduce((a,b)=>a+b,0);
+    return {s, votes:ws.map(x=>Math.round(tot*x/sw)), inv:Math.floor(R()*14)};
+  });
+  demoState={dd,stations,order,n:Math.round(stations.length*0.42),t0:Date.now()-95*60000,times:[]};
+  for(let i=0;i<demoState.n;i++) demoState.times.push(demoState.t0+i*(95*60000/demoState.n)*(0.7+0.6*Math.random()));
+  demoState.times.sort((a,b)=>a-b);
+}
+function demoPayload(){
+  if(!demoState)demoMake();
+  const S=demoState, dd=S.dd;
+  S.n=Math.min(S.stations.length,S.n+(S.n<S.stations.length?Math.floor(3+Math.random()*7):0));
+  while(S.times.length<S.n)S.times.push(Date.now()-Math.random()*3000);
+  const done=new Set(S.order.slice(0,S.n));
+  const v=dd.cands.map(()=>0);let valid=0,invalid=0;
+  const stations=S.stations.map((x,i)=>{
+    if(!done.has(i))return [x.s[0],x.s[1],x.s[2],null];
+    x.votes.forEach((y,j)=>v[j]+=y);valid+=x.votes.reduce((a,b)=>a+b,0);invalid+=x.inv;
+    return [x.s[0],x.s[1],x.s[2],x.votes];
+  });
+  return {ok:true,status:'open',title:'2026 桃園市議員選舉 中壢區 開票即時',sub:'第 7 選舉區（中壢區）',seats:11,defaultNo:0,cands:dd.cands,
+    updated:Date.now(),total:stations.length,reported:S.n,valid,invalid,v,stations,trend:S.times.slice(0,S.n)};
+}
+
+/* ---------- 取資料 ---------- */
+async function load(){
+  try{
+    let d;
+    if(DEMO){ d=demoPayload(); }
+    else{
+      const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),15000);
+      try{const r=await fetch(API+'?action=pub&_='+Date.now(),{signal:ctl.signal});d=await r.json();}finally{clearTimeout(t);}
+    }
+    if(!d||!d.ok)throw new Error((d&&d.error)||'bad');
+    D=d;lastOk=Date.now();failing=false;
+    render();
+  }catch(e){
+    failing=true; if(!D){ $('root').innerHTML='<div class="card empty">暫時連不上資料，請稍後重新整理。<br><br><button class="seg on" onclick="location.reload()">重新整理</button></div>'; }
+    pill();
+  }
+  setTimeout(load, DEMO?4000:(26000+Math.random()*8000));
+}
+function pill(){
+  const p=$('pill'); if(!D){return}
+  if(D.status==='closed'){p.classList.remove('stale');$('pilltxt').textContent='尚未開放';return;}
+  if(failing||Date.now()-lastOk>90000){p.classList.add('stale');$('pilltxt').textContent='連線不穩，目前顯示 '+hm(lastOk)+' 的資料';}
+  else{p.classList.remove('stale');$('pilltxt').textContent='即時更新　資料時間 '+hms(D.updated);}
+}
+setInterval(pill,5000);
+
+/* ---------- 聚合 ---------- */
+function liAgg(){
+  const m=new Map();
+  D.stations.forEach(s=>{
+    let a=m.get(s[1]); if(!a){a={li:s[1],n:0,rep:0,valid:0,v:D.cands.map(()=>0),st:[]};m.set(s[1],a);}
+    a.n++;a.st.push(s);
+    if(s[3]){a.rep++;s[3].forEach((x,i)=>{a.v[i]+=x;a.valid+=x;});}
+  });
+  return [...m.values()];
+}
+function rankOf(arr,i,key){ let r=1; for(let j=0;j<arr.length;j++) if(arr[j][key]>arr[i][key]) r++; return r; }
+
+/* ---------- 渲染 ---------- */
+function render(){
+  $('demo').classList.toggle('hide',!DEMO);
+  $('title').textContent=D.title||'開票即時'; $('sub').textContent=D.sub||'';
+  document.title=(D.title||'開票即時');
+  pill();
+  if(D.status==='closed'){ renderClosed(); return; }
+  if(!$('prog')){ buildShell(); }
+  renderProg(); renderRank(); renderTrend(); renderQuery();
+}
+function renderClosed(){
+  let t='';
+  if(D.openAt){const d=new Date(D.openAt); if(!isNaN(d))t=`預計 ${d.getMonth()+1} 月 ${d.getDate()} 日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} 起提供即時票數`;}
+  $('root').innerHTML=`<div class="card closed"><div style="font-size:44px">🗳️</div><div class="t">投票結束、開票後開放查看</div>
+  <div class="muted" style="color:var(--mute)">${esc(t)}<br>本頁會自動更新，請稍候。</div></div>
+  <div class="card"><h2>候選人（${D.cands.length} 位）</h2><div class="cap">依號次排列</div>${D.cands.map(c=>`<div class="cr ${c.ours?'ours':''}"><div class="l1"><span class="bd">${c.no}</span><span class="cn">${esc(c.name)}</span><span class="pt">${esc(c.party)}</span></div></div>`).join('')}</div>`;
+}
+function buildShell(){
+  $('root').innerHTML=`
+  <div class="card" id="prog"></div>
+  <div class="card"><h2>各候選人得票</h2><div class="cap" id="rankcap"></div>
+    <div class="tools"><button class="seg" data-sort="votes">依得票排序</button><button class="seg" data-sort="no">依號次排序</button></div>
+    <div id="rank"></div><div class="note" id="ranknote"></div></div>
+  <div class="card"><h2>開票進度曲線</h2><div class="cap">累計已回報的投開票所數</div><div id="trend"></div></div>
+  <div class="card"><h2>查詢</h2><div class="cap">看各里的得票，或查自己的投開票所</div>
+    <div class="tools"><button class="seg" data-tab="li">各里得票</button><button class="seg" data-tab="find">查里／投開票所</button></div>
+    <div id="tab-li"><select class="sel" id="candsel"></select><input class="q" id="lif" placeholder="篩選里名（例：青埔）" style="margin-bottom:6px"><div id="lilist"></div></div>
+    <div id="tab-find" class="hide"><input class="q" id="q" placeholder="輸入里名、學校名稱或投開票所編號" inputmode="search"><div class="res" id="res"></div><div id="det"></div></div>
+  </div>`;
+  document.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{ST.sort=b.dataset.sort;renderRank();});
+  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{ST.tab=b.dataset.tab;renderQuery();});
+  $('candsel').onchange=e=>{ST.candNo=+e.target.value||0;ST.liAll=false;renderLiList();};
+  $('lif').oninput=e=>{ST.liFilter=e.target.value.trim();renderLiList();};
+  $('q').oninput=e=>{ST.q=e.target.value.trim();renderFind();};
+}
+function renderProg(){
+  const r=D.reported,t=D.total,p=pct(r,t);
+  $('prog').innerHTML=`<div class="prog"><span class="big">${fmt(r)}</span><span class="of">／ ${fmt(t)} 所已開出</span><span class="pct">${p1(p)}</span></div>
+  <div class="pbar"><i style="width:${p}%"></i></div>
+  <div class="stats"><span>已統計有效票 <b>${fmt(D.valid)}</b></span><span>無效票 <b>${fmt(D.invalid)}</b></span><span>尚未開出 <b>${fmt(t-r)}</b> 所</span></div>`;
+}
+function renderRank(){
+  document.querySelectorAll('[data-sort]').forEach(b=>b.classList.toggle('on',b.dataset.sort===ST.sort));
+  const rows=D.cands.map((c,i)=>({c,v:D.v[i],i}));
+  const max=Math.max(1,...rows.map(x=>x.v));
+  const sorted=ST.sort==='votes'?[...rows].sort((a,b)=>b.v-a.v||a.c.no-b.c.no):[...rows].sort((a,b)=>a.c.no-b.c.no);
+  const seats=D.seats||0; let h='';
+  sorted.forEach((x,idx)=>{
+    const rk=rankOf(rows,rows.indexOf(x),'v');
+    if(ST.sort==='votes'&&D.reported>0&&seats&&idx===seats) h+=`<div class="seatline">暫列前 ${seats} 名（應選 ${seats} 席）</div>`;
+    h+=`<div class="cr ${x.c.ours?'ours':''} ${pcls(x.c.party)}"><div class="l1"><span class="rk">${D.reported>0?rk:'–'}</span><span class="bd">${x.c.no}</span>
+      <span class="cn">${esc(x.c.name)}</span><span class="pt">${esc(x.c.party)}</span>${x.c.ours?'<span class="star">我方</span>':''}
+      <span class="vt"><b>${fmt(x.v)}</b><span>${D.valid?p1(pct(x.v,D.valid)):'–'}</span></span></div>
+      <div class="tr"><i style="width:${pct(x.v,max)}%"></i></div></div>`;
+  });
+  $('rank').innerHTML=h;
+  $('rankcap').textContent=`應選 ${seats} 席，共 ${D.cands.length} 人登記｜得票率＝佔目前已統計有效票`;
+  $('ranknote').textContent=D.reported<D.total?`目前僅開出 ${fmt(D.reported)}／${fmt(D.total)} 所，名次與得票率仍會變動。`:'全部投開票所皆已回報。正式結果仍以中選會公告為準。';
+}
+function renderTrend(){
+  const el=$('trend'); const tr=D.trend||[];
+  if(tr.length<2){el.innerHTML='<div class="empty">開票所陸續回報後，這裡會畫出進度曲線。</div>';return;}
+  const W=640,H=200,L=36,R=12,T=10,B=26;
+  const t0=tr[0],t1=Math.max(tr[tr.length-1],t0+1);
+  const x=t=>L+(t-t0)/(t1-t0||1)*(W-L-R), y=n=>T+(1-n/D.total)*(H-T-B);
+  let pts=tr.map((t,i)=>[x(t),y(i+1)]);
+  const path='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');
+  const area=path+` L${pts[pts.length-1][0].toFixed(1)},${y(0)} L${pts[0][0].toFixed(1)},${y(0)} Z`;
+  let g='';[0,.25,.5,.75,1].forEach(f=>{const yy=y(D.total*f);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${yy+4}" text-anchor="end" font-size="11" fill="var(--mute)">${Math.round(D.total*f)}</text>`;});
+  const ticks=4;for(let i=0;i<=ticks;i++){const t=t0+(t1-t0)*i/ticks;g+=`<text x="${x(t)}" y="${H-6}" text-anchor="${i===0?'start':i===ticks?'end':'middle'}" font-size="11" fill="var(--mute)">${hm(t)}</text>`;}
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="開票進度曲線">${g}<path d="${area}" fill="var(--g)" opacity=".15"/><path d="${path}" fill="none" stroke="var(--g)" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
+}
+function renderQuery(){
+  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===ST.tab));
+  $('tab-li').classList.toggle('hide',ST.tab!=='li'); $('tab-find').classList.toggle('hide',ST.tab!=='find');
+  const sel=$('candsel');
+  if(!sel.options.length){ sel.innerHTML='<option value="">請選擇候選人</option>'+D.cands.map(c=>`<option value="${c.no}">${c.no} 號　${esc(c.name)}（${esc(c.party)}）</option>`).join(''); }
+  // 預設候選人號次：後台設定若有填才預選；留空（0）＝不預選、不偏向任何人（公用頁面）
+  if(ST.candNo==null){ST.candNo=D.cands.some(c=>c.no===D.defaultNo)?D.defaultNo:0;}
+  sel.value=ST.candNo?String(ST.candNo):'';
+  if(ST.tab==='li')renderLiList(); else renderFind();
+}
+function renderLiList(){
+  if(!ST.candNo){ $('lilist').innerHTML='<div class="empty">請先從上方選擇一位候選人，查看他在各里的得票率。</div>'; return; }
+  const ci=D.cands.findIndex(c=>c.no===ST.candNo); const cand=D.cands[ci];
+  let a=liAgg().map(x=>({...x,share:x.valid?x.v[ci]/x.valid*100:-1,votes:x.v[ci]}));
+  if(ST.liFilter)a=a.filter(x=>x.li.includes(ST.liFilter));
+  a.sort((p,q)=>q.share-p.share||q.n-p.n);
+  const max=Math.max(1,...a.map(x=>x.share));
+  const lim=(ST.liAll||ST.liFilter)?a.length:12;
+  let h=a.slice(0,lim).map(x=>x.valid?`<div class="sr"><div class="nm">${esc(x.li)}<small>${x.rep}/${x.n} 所</small></div>
+     <div class="num" style="grid-column:3;grid-row:1"><b>${p1(x.share)}</b><small>${fmt(x.votes)} 票</small></div><div class="mb"><i style="width:${x.share/max*100}%;background:${pcol(cand.party)}"></i></div></div>`
+     :`<div class="sr none"><div class="nm">${esc(x.li)}<small>${x.rep}/${x.n} 所</small></div><div class="num" style="grid-column:3">尚未開出</div></div>`).join('');
+  if(!a.length)h='<div class="empty">沒有符合的里</div>';
+  if(a.length>lim)h+=`<button class="more" id="more">展開全部 ${a.length} 個里 ▾</button>`;
+  $('lilist').innerHTML=`<div class="cap" style="margin:4px 0 6px">${esc(cand.name)} 在各里的得票率（佔該里已統計有效票），由高到低</div>`+h;
+  const m=$('more'); if(m)m.onclick=()=>{ST.liAll=true;renderLiList();};
+}
+function renderFind(){
+  const q=ST.q; const res=$('res');
+  if(!q){res.innerHTML='<div class="empty">例：「青埔」、「過嶺國中」、「800」</div>'; renderDet(); return;}
+  const lis=liAgg().filter(x=>x.li.includes(q)).slice(0,6).map(x=>({k:'li',x}));
+  const qn=q.replace(/^0+/,'');
+  const sts=D.stations.filter(s=>s[2].includes(q)||s[1].includes(q)||(/^\d+$/.test(q)&&String(s[0]).includes(qn||q))).slice(0,14).map(s=>({k:'st',s}));
+  const all=[...lis,...sts];
+  res.innerHTML=all.length?all.map((r,i)=>r.k==='li'
+   ?`<button data-i="${i}"><span class="tag g">里</span><b>${esc(r.x.li)}</b><span class="tag">${r.x.rep}/${r.x.n} 所已開出</span></button>`
+   :`<button data-i="${i}"><span class="tag">${pad(r.s[0])}</span><b>${esc(r.s[2])}</b><span class="tag">${esc(r.s[1])}</span><span class="tag ${r.s[3]?'g':''}">${r.s[3]?'已開出':'未開出'}</span></button>`).join(''):'<div class="empty">找不到符合的里或投開票所</div>';
+  res.querySelectorAll('button').forEach(b=>b.onclick=()=>{const r=all[+b.dataset.i];ST.sel=r.k==='li'?{k:'li',id:r.x.li}:{k:'st',id:r.s[0]};renderDet();$('det').scrollIntoView({behavior:'smooth',block:'nearest'});});
+  renderDet();
+}
+function bars(v,valid){
+  const max=Math.max(1,...v);
+  return D.cands.map((c,i)=>({c,v:v[i]})).sort((a,b)=>b.v-a.v||a.c.no-b.c.no).map(x=>`<div class="dr ${x.c.ours?'ours':''} ${pcls(x.c.party)}"><span>${x.c.no} 號　${esc(x.c.name)} <span class="pt">${esc(x.c.party)}</span></span><span class="v">${fmt(x.v)}　<small style="color:var(--mute);font-weight:400">${valid?p1(pct(x.v,valid)):'–'}</small></span><div class="mb"><i style="width:${pct(x.v,max)}%"></i></div></div>`).join('');
+}
+function renderDet(){
+  const el=$('det'); if(!ST.sel){el.innerHTML='';return;}
+  if(ST.sel.k==='li'){
+    const a=liAgg().find(x=>x.li===ST.sel.id); if(!a){el.innerHTML='';return;}
+    el.innerHTML=`<div class="det"><h3>${esc(a.li)}</h3><div class="cap">${a.rep}／${a.n} 個投開票所已開出　有效票 ${fmt(a.valid)}</div>
+    ${a.valid?bars(a.v,a.valid):'<div class="empty">這個里還沒有投開票所回報</div>'}
+    <div class="cap" style="margin-top:10px">投開票所（點選看單所結果）</div><div class="chips">${a.st.map(s=>`<button class="chip ${s[3]?'done':''}" data-id="${s[0]}">${pad(s[0])} ${esc(s[2])}</button>`).join('')}</div></div>`;
+    el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ST.sel={k:'st',id:+b.dataset.id};renderDet();});
+  }else{
+    const s=D.stations.find(x=>x[0]===ST.sel.id); if(!s){el.innerHTML='';return;}
+    const valid=s[3]?s[3].reduce((a,b)=>a+b,0):0;
+    el.innerHTML=`<div class="det"><h3>第 ${pad(s[0])} 投開票所</h3><div class="cap">${esc(s[2])}（${esc(s[1])}）｜${s[3]?'已開出，有效票 '+fmt(valid):'尚未開出'}</div>
+    ${s[3]?bars(s[3],valid):'<div class="empty">此投開票所還沒回報，開票後會自動出現。</div>'}
+    <button class="more" id="toli">← 看 ${esc(s[1])} 整體</button></div>`;
+    $('toli').onclick=()=>{ST.sel={k:'li',id:s[1]};renderDet();};
+  }
+}
+
+load();
+})();
+</script>
+</body>
+</html>

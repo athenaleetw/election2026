@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>開票總部看板</title>
+<style>
+:root{--bg:#efe9dd;--card:#faf7f1;--ink:#38332c;--mute:#7c7467;--line:#d9cfbe;--g:#16934a;--gsoft:#dff3e6;--amb:#8a6500;--ambbg:#fbf1c9;--red:#b3261e;--redbg:#fdecea}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding:12px 14px 60px}
+h1{font-size:20px;margin:6px 0 2px}
+.sub{color:var(--mute);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi b{display:block;font-size:30px;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi span{font-size:12.5px;color:var(--mute)}
+.kpi.red b{color:var(--red)} .kpi.g b{color:var(--g)}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:4px 0 12px}.bar i{display:block;height:100%;background:var(--g)}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.seg{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font-size:14px;cursor:pointer;font:inherit}
+.seg.on{background:var(--g);border-color:var(--g);color:#fff}
+input.q{height:40px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font-size:15px;background:var(--card);color:var(--ink);flex:1;min-width:160px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+th,td{padding:8px 10px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--gsoft);font-size:12.5px;color:var(--mute);border-top:0}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{font-size:12px;border-radius:5px;padding:1px 7px;white-space:nowrap;display:inline-block}
+.t-ok{background:var(--gsoft);color:var(--g)} .t-no{background:var(--redbg);color:var(--red)} .t-w{background:var(--ambbg);color:var(--amb)}
+a{color:var(--g)} a.btn{display:inline-block;border:1px solid var(--g);border-radius:8px;padding:2px 10px;text-decoration:none;font-size:13px;white-space:nowrap}
+.login{max-width:360px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.fl{display:block;font-size:13px;color:var(--mute);margin-top:8px}
+.login select{width:100%;height:46px;font-size:17px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin:6px 0}
+.tag.t-of{background:var(--gsoft);color:var(--g);font-weight:700}
+.who{font-size:13px;color:var(--mute);margin-left:8px;font-weight:400}
+.who a{color:var(--g)}
+.login input{width:100%;height:46px;font-size:18px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin:10px 0}
+.login button{width:100%;height:46px;border:0;border-radius:10px;background:var(--g);color:#fff;font-size:17px;font-weight:700}
+.err{color:var(--red);font-size:14px}
+.pillw{display:inline-block;font-size:12.5px;padding:2px 9px;border-radius:99px;margin-left:6px}
+.hide{display:none!important}
+.small{font-size:12.5px;color:var(--mute)}
+.teams{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 10px}
+.tm{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:5px 10px;font-size:13px;cursor:pointer}
+.tm b{font-variant-numeric:tabular-nums}.tm.on{border-color:var(--g);background:var(--gsoft)}
+@media(max-width:640px){th.h,td.h{display:none}}
+</style>
+</head>
+<body>
+<div id="login" class="login hide">
+  <h1>開票總部後台</h1>
+  <div class="sub">僅限管理人員。請依序<b>選擇服務處</b>、<b>輸入全名</b>、<b>輸入驗證碼</b>，三項都正確才能登入。</div>
+  <label class="fl">① 服務處</label><select id="ao"><option value="">載入中…</option></select>
+  <label class="fl">② 全名（請輸入完整姓名）</label><input id="an" autocomplete="off" placeholder="全名">
+  <label class="fl">③ 驗證碼</label><input id="ap" type="password" inputmode="numeric" autocomplete="off" placeholder="驗證碼">
+  <div class="err" id="lerr"></div><button id="lgo">登入</button>
+</div>
+<div class="wrap hide" id="main">
+  <h1>開票總部看板 <span id="st" class="pillw"></span><span id="who" class="who"></span></h1>
+  <div class="sub" id="upd"></div>
+  <div class="cards" id="kpi"></div>
+  <div class="bar"><i id="pb" style="width:0"></i></div>
+  <div id="teams" class="teams"></div>
+  <div class="tools" id="tabs">
+    <button class="seg" data-t="miss">未回報（催報）</button><button class="seg" data-t="flag">異常／需複核</button>
+    <button class="seg" data-t="all">全部 270 所</button><button class="seg" data-t="recent">最近回報</button>
+    <select class="q" id="team" style="flex:0 0 auto;min-width:130px"><option value="">全部責任議員</option></select>
+    <input class="q" id="q" placeholder="搜尋所號、里、學校、報票人">
+  </div>
+  <div id="tbl"></div>
+  <p class="small">「代報」：志工沒電／沒訊號、改由電話回報時，總部可代為輸入（會記為「總部代報（您的姓名）」）。畫面每 15 秒自動更新。</p>
+</div>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+(function(){
+const API=(window.ELECTION_API||'').trim(), DEMO=!API;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(4,'0');
+const hms=t=>{const d=new Date(t);return [d.getHours(),d.getMinutes(),d.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':')};
+let TOKEN='';try{TOKEN=localStorage.getItem('eadm')||'';}catch(e){}
+let D=null,tab='miss',q='',ME=null,TM=null;
+
+function demo(){
+  const dd=window.DEMO_DATA; const R=()=>Math.random();
+  const stations=dd.stations.map((s,i)=>{const done=R()<.55;return{id:s[0],li:s[1],name:s[2],team:['張曉昀','張曉昀','張曉昀','彭俊豪','彭俊豪','彭俊豪','黃崇真','黃崇真','魏筠','魏筠'][i%10],done,first:done?Date.now()-R()*5e6:0,last:done?Date.now()-R()*3e6:0,who:'志工'+(i+1),cnt:R()<.06?2:0,valid:done?900+Math.floor(R()*500):'',invalid:0,flags:done&&R()<.05?'有效票不符(自報1203/加總1230)':'',rep:[{n:'志工'+(i+1),p:'09'+String(12000000+i)}]};});
+  return{ok:true,now:Date.now(),total:270,stations,recent:stations.filter(s=>s.done).slice(0,15).map(s=>({t:s.last,sid:s.id,who:s.who,type:'首次',valid:s.valid,flags:s.flags})),status:'open',rehearsal:true,reportOpen:true};
+}
+async function load(){
+  if(!TOKEN){ showLogin(''); return; }
+  try{
+    const r=DEMO?demo():await (await fetch(API+'?'+new URLSearchParams({action:'adm',token:TOKEN,_:Date.now()}))).json();
+    if(!r.ok){ if(/登入/.test(r.error||'')){ TOKEN=''; try{localStorage.removeItem('eadm');}catch(e){} showLogin(r.error); return; } throw new Error(r.error); }
+    D=r; if(r.me)ME=r.me; $('login').classList.add('hide'); $('main').classList.remove('hide'); render();
+  }catch(e){ if(D)$('upd').textContent='連線失敗，顯示的是舊資料（'+hms(D.now)+'）'; else showLogin('連線失敗：'+e.message); }
+  clearTimeout(TM); TM=setTimeout(load,15000);
+}
+async function loadOffices(){
+  let sel=$('ao'); if(!sel||sel.tagName!=='SELECT'||sel.dataset.loaded)return; sel.dataset.loaded='1';
+  let offs=[];
+  try{ offs=DEMO?['黃崇真服務處','彭俊豪服務處','張曉昀服務處','魏筠服務處']:((await (await fetch(API+'?action=adminopts')).json()).offices||[]); }catch(e){}
+  if(offs.length){ sel.innerHTML='<option value="">請選擇服務處</option>'+offs.map(o=>`<option>${esc(o)}</option>`).join(''); }
+  else{ const i=document.createElement('input'); i.id='ao'; i.placeholder='例：黃崇真服務處'; i.autocomplete='off'; sel.replaceWith(i); }
+}
+function showLogin(msg){ $('main').classList.add('hide'); $('login').classList.remove('hide'); $('lerr').textContent=msg||''; loadOffices(); }
+async function doLogin(){
+  const name=$('an').value.trim(), office=$('ao').value.trim(), code=$('ap').value.trim();
+  if(!name||!office||!code){ $('lerr').textContent='請依序選擇服務處、輸入全名與驗證碼。'; return; }
+  const btn=$('lgo'); btn.disabled=true; btn.textContent='驗證中…'; $('lerr').textContent='';
+  try{
+    const r=DEMO?{ok:true,token:'DEMO',name,office}:await (await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'adminlogin',name,office,code})})).json();
+    if(!r.ok){ $('lerr').textContent=r.error||'登入失敗'; return; }
+    TOKEN=r.token; ME={name:r.name,office:r.office}; try{localStorage.setItem('eadm',TOKEN);}catch(e){}
+    $('ap').value=''; load();
+  }catch(e){ $('lerr').textContent='連線失敗，請稍後再試。'; }
+  finally{ btn.disabled=false; btn.textContent='登入'; }
+}
+function logout(){ TOKEN=''; ME=null; D=null; try{localStorage.removeItem('eadm');}catch(e){} showLogin(''); }
+$('lgo').onclick=doLogin;
+$('an').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('ap').focus();}};
+$('ap').onkeydown=e=>{if(e.key==='Enter')doLogin();};
+$('q').oninput=e=>{q=e.target.value.trim();render();};
+let TEAM='';
+$('team').onchange=e=>{TEAM=e.target.value;render();};
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();});
+
+function render(){
+  // 責任議員（陣營）：進度小卡＋下拉篩選
+  const tmap={};D.stations.forEach(s=>{const t=s.team||'(未分)';(tmap[t]=tmap[t]||{n:0,d:0});tmap[t].n++;if(s.done)tmap[t].d++;});
+  const tnames=Object.keys(tmap).sort((a,b)=>tmap[b].n-tmap[a].n);
+  const sel=$('team');
+  if(sel.options.length!==tnames.length+1){sel.innerHTML='<option value="">全部責任議員</option>'+tnames.map(t=>`<option value="${esc(t)}">${esc(t)}（${tmap[t].n} 所）</option>`).join('');}
+  sel.value=TEAM;
+  $('teams').innerHTML=tnames.length>1?tnames.map(t=>`<span class="tm${TEAM===t?' on':''}" data-t="${esc(t)}">${esc(t)} <b>${tmap[t].d}/${tmap[t].n}</b></span>`).join(''):'';
+  document.querySelectorAll('.tm').forEach(el=>el.onclick=()=>{TEAM=TEAM===el.dataset.t?'':el.dataset.t;render();});
+  const ALL=D.stations;
+  const S=TEAM?ALL.filter(s=>(s.team||'(未分)')===TEAM):ALL, done=S.filter(s=>s.done), miss=S.filter(s=>!s.done);
+  const flag=S.filter(s=>s.done&&(s.flags||s.cnt>0));
+  const noRep=S.filter(s=>!s.rep.length);
+  const mm=D.me||ME; $('who').innerHTML=mm?`${esc(mm.name)}｜${esc(mm.office)}　<a href="#" id="out">登出</a>`:''; if($('out'))$('out').onclick=e=>{e.preventDefault();logout();};
+  $('st').textContent=D.status==='open'?'民眾頁：開放中':'民眾頁：未開放';
+  $('st').className='pillw '+(D.status==='open'?'t-ok':'t-w');
+  if(D.rehearsal)$('st').textContent+='（演練模式）';
+  $('upd').textContent='更新 '+hms(D.now)+(D.reportOpen?'':'　⚠ 回報目前為「暫停」狀態');
+  $('kpi').innerHTML=`<div class="kpi g"><b>${done.length}</b><span>已回報</span></div><div class="kpi red"><b>${miss.length}</b><span>未回報</span></div>
+   <div class="kpi"><b>${flag.length}</b><span>異常／更正過</span></div><div class="kpi"><b>${noRep.length}</b><span>沒有報票人的所</span></div>
+   <div class="kpi"><b>${(done.length/(S.length||1)*100).toFixed(1)}%</b><span>開票進度</span></div>`;
+  $('pb').style.width=(done.length/(S.length||1)*100)+'%';
+  document.querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  let rows;
+  if(tab==='recent'){
+    $('tbl').innerHTML=`<table><tr><th>時間</th><th>所號</th><th>回報人</th><th>類型</th><th>有效票</th><th>提醒</th></tr>${D.recent.map(r=>`<tr><td class="n">${hms(r.t)}</td><td class="n">${pad(r.sid)}</td><td>${esc(r.who)}</td><td>${esc(r.type)}</td><td class="n">${esc(r.valid)}</td><td>${r.flags?`<span class="tag t-w">${esc(r.flags)}</span>`:''}</td></tr>`).join('')}</table>`;
+    return;
+  }
+  rows=tab==='miss'?miss:tab==='flag'?flag:S;
+  if(q)rows=rows.filter(s=>(pad(s.id)+s.li+s.name+s.who+s.rep.map(r=>r.n).join('')).includes(q)||String(s.id).includes(q));
+  const link=id=>DEMO?`report.html?s=${id}`:`report.html?s=${id}`;
+  $('tbl').innerHTML=rows.length?`<table><tr><th>所號</th><th>里／投開票所</th><th class="h">報票人</th><th class="h">權責服務處</th><th>狀態</th><th></th></tr>${rows.map(s=>`<tr>
+   <td class="n">${pad(s.id)}</td><td><b>${esc(s.name)}</b><br><span class="small">${esc(s.li)}</span></td>
+   <td class="h">${s.rep.length?s.rep.map(r=>`${esc(r.n)} ${r.p?`<a href="tel:${esc(r.p)}">${esc(r.p)}</a>`:''}`).join('<br>'):'<span class="tag t-no">無報票人</span>'}</td>
+   <td class="h">${s.team?`<span class="tag t-of">${esc(s.team)}服務處</span>`:''}</td>
+   <td>${s.done?`<span class="tag t-ok">已回報</span> <span class="small">${hms(s.last)} ${esc(s.valid)}票</span>${s.cnt?` <span class="tag t-w">更正${s.cnt}次</span>`:''}${s.flags?`<br><span class="tag t-w">${esc(s.flags)}</span>`:''}`:'<span class="tag t-no">未回報</span>'}</td>
+   <td><a class="btn" href="${link(s.id)}" target="_blank" rel="noopener">${s.done?'代為更正':'代報'}</a></td></tr>`).join('')}</table>`:'<p class="small">沒有符合的項目 🎉</p>';
+}
+if(TOKEN)load(); else showLogin('');
+})();
+</script>
+</body>
+</html>

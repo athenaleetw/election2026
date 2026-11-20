@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>開票回報</title>
+<style>
+:root{
+  --bg:#f4f6f3; --card:#fff; --ink:#16231b; --mute:#5d6b62; --line:#d9e0da;
+  --g:#1f7a45; --g2:#16603a; --gbg:#e6f3ea; --red:#c0392b; --redbg:#fdecea; --amb:#8a5a00; --ambbg:#fff4d6;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0f1512; --card:#18211c; --ink:#eef4ef; --mute:#9db0a3; --line:#2b3a31;
+  --g:#46b373; --g2:#6fd197; --gbg:#16311f; --red:#ff8a7a; --redbg:#3a1d19; --amb:#ffd166; --ambbg:#3a2f10;
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.5;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+header.top{position:sticky;top:0;z-index:5;background:var(--g2);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+header.top .in{max-width:560px;margin:0 auto}
+.sid{font-size:13px;opacity:.85}
+.place{font-size:20px;font-weight:700;line-height:1.3}
+.who{font-size:13px;opacity:.9;margin-top:2px}
+.banner{margin:12px 0;padding:10px 12px;border-radius:10px;font-size:14px}
+.b-amb{background:var(--ambbg);color:var(--amb)} .b-red{background:var(--redbg);color:var(--red)} .b-g{background:var(--gbg);color:var(--g2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden}
+.row{display:grid;grid-template-columns:54px 1fr 124px;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.no{font-size:28px;font-weight:800;text-align:center;color:var(--g2);font-variant-numeric:tabular-nums}
+.nm{font-size:20px;font-weight:700;line-height:1.2}
+.pt{font-size:12px;color:var(--mute)}
+input.n{width:100%;height:56px;font-size:28px;font-weight:700;text-align:right;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
+input.n:focus{outline:none;border-color:var(--g);background:var(--card)}
+.row.filled input.n{border-color:var(--g)}
+.extra{padding:12px}
+.extra label{display:block;font-size:15px;font-weight:600;margin:8px 0 4px}
+.extra .hint{font-size:12.5px;color:var(--mute);font-weight:400}
+.extra input{height:48px;font-size:22px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:6}
+.bar .in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.sum{flex:1;font-size:13px;color:var(--mute)}
+.sum b{display:block;font-size:26px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+button{font:inherit;cursor:pointer}
+.btn{min-height:52px;line-height:1.3;padding:8px 18px;border:0;border-radius:12px;background:var(--g);color:#fff;font-size:18px;font-weight:700}
+.btn:disabled{opacity:.5}
+.btn.ghost{background:transparent;color:var(--g2);border:2px solid var(--g)}
+.btn.block{width:100%}
+.btn.warn{background:#b9770e}
+/* 多所清單 */
+.pk{display:flex;width:100%;align-items:center;gap:10px;text-align:left;padding:12px;margin:0 0 8px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.pk.cur{border-color:var(--g)}
+.pk .no4{font-size:22px;font-weight:800;color:var(--g2);font-variant-numeric:tabular-nums}
+.pk .pn{flex:1;font-size:17px;font-weight:700;line-height:1.3}
+.pk .pn small{display:block;font-size:12.5px;color:var(--mute);font-weight:400}
+.pk .st{font-size:13px;font-weight:700;border-radius:8px;padding:3px 9px;white-space:nowrap}
+.pk .st.ok{background:var(--gbg);color:var(--g2)} .pk .st.no{background:var(--redbg);color:var(--red)}
+/* 自製數字鍵盤（固定在底部） */
+.pad{max-width:560px;margin:0 auto}
+.bar.padopen .in{display:none}
+.pad .lab{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute);margin-bottom:6px}
+.pad .lab #padlab{flex:1;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pad .lab .ps b{font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums}
+.pad .lab button{background:none;border:0;color:var(--g2);font-size:14px;font-weight:700;padding:4px 6px}
+.pad .keys{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,48px);gap:7px;user-select:none;-webkit-user-select:none}
+.pad .keys button{border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-size:28px;font-weight:700;touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:0}
+.pad .keys button:active{background:var(--gbg);border-color:var(--g)}
+.pad .keys .fn{font-size:17px;color:var(--mute)}
+.pad .keys .nx{grid-column:4;grid-row:3 / span 2;background:var(--g);color:#fff;font-size:20px;border-color:var(--g)}
+.pad .keys .nx:active{background:var(--g2)}
+.pad .keys .z{grid-column:1 / span 3}
+input.n[readonly]{caret-color:transparent;cursor:pointer}
+input.n.act{border-color:var(--g);background:var(--card);box-shadow:0 0 0 4px rgba(31,122,69,.22)}
+.row.cur{background:var(--gbg)}
+.cf{width:100%;border-collapse:collapse}
+.cf td{padding:9px 12px;border-top:1px solid var(--line);font-size:18px}
+.cf tr:first-child td{border-top:0}
+.cf td:last-child{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;font-size:22px}
+.cf .blank td:last-child{color:var(--red)}
+.big{text-align:center;padding:28px 12px}
+.big .ok{font-size:72px;line-height:1;color:var(--g)}
+.big h1{margin:10px 0 4px;font-size:26px}
+.muted{color:var(--mute);font-size:14px}
+.codebox{padding:20px 4px}
+.codebox input{width:100%;height:56px;font-size:26px;text-align:center;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.hide{display:none!important}
+.err{color:var(--red);font-weight:600;margin:10px 0}
+.demo{background:#b9770e;color:#fff;text-align:center;font-size:13px;padding:4px}
+</style>
+</head>
+<body>
+<div id="demo" class="demo hide">示範模式：資料不會送出，也不會寫入任何地方</div>
+<header class="top"><div class="in">
+  <div class="sid" id="sid">開票回報</div>
+  <div class="place" id="place">載入中…</div>
+  <div class="who" id="who"></div>
+</div></header>
+<main class="wrap" id="app"><p class="muted" style="padding:24px 0">載入中…</p></main>
+<div class="bar hide" id="bar"><div class="in">
+  <div class="sum">填寫進度<b><span id="cnt">0</span>／<span id="tot">17</span> 位</b></div>
+  <button class="btn" id="go">檢查並送出</button>
+</div>
+<div class="pad hide" id="pad">
+  <div class="lab"><span id="padlab">輸入中</span><button type="button" id="padclose">收起 ▾</button></div>
+  <div class="keys" id="keys">
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="bk" class="fn">⌫ 刪除</button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button data-k="clr" class="fn">清除</button>
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button data-k="next" class="nx" id="padnext">下一筆 ▸</button>
+    <button data-k="0" class="z">0</button>
+  </div>
+</div></div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+(function(){
+const API=(window.ELECTION_API||'').trim();
+const DEMO=!API;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(4,'0');
+const qs=new URLSearchParams(location.search);
+let K=(qs.get('k')||'').trim().toUpperCase();
+const ADM_STATION=qs.get('s');
+let ADM='';try{ADM=localStorage.getItem('eadm')||'';}catch(e){}
+try{if(!K&&!ADM_STATION)K=(localStorage.getItem('ek')||'').toUpperCase();}catch(e){}
+
+let me=null, vals={}, invalid='', declared='', reqid='', existingNote='';
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+
+async function api(params,body){
+  if(DEMO){ return demoApi(params,body); }
+  /* 網路失敗自動重試（最多 4 次，間隔隨機錯開，避免大家一起撞）。送出票數帶有 reqid，重送不會重複計算。 */
+  let lastErr;
+  for(let i=0;i<4;i++){
+    const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),20000);
+    try{
+      let r;
+      if(body) r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal:ctl.signal});
+      else r=await fetch(API+'?'+new URLSearchParams(params),{signal:ctl.signal});
+      return await r.json();
+    }catch(e){ lastErr=e; }
+    finally{clearTimeout(t);}
+    await new Promise(r=>setTimeout(r,1500+Math.random()*2500+i*1500));
+  }
+  throw lastErr;
+}
+function demoApi(p,body){
+  if(body&&body.action==='login'){
+    const q=String(body.q||'').trim(), dg=q.replace(/\D/g,'');
+    if(dg==='0939760785') return Promise.resolve({ok:true,pickname:[{name:'簡秀英',k:'DEMO0'},{name:'謝玟玲',k:'DEMO2'}]});
+    if(dg.length>=9) return Promise.resolve({ok:true,k:'DEMO0'});
+    if(q==='王小明') return Promise.resolve({ok:true,choose:[{k:'DEMO0',stations:[{sid:785,name:'後寮市民活動中心'},{sid:786,name:'普仁國小(117教室)'}],more:0},{k:'DEMO2',stations:[{sid:1030,name:'青埔國中901班'}],more:0}]});
+    if(q==='不存在') return Promise.resolve({ok:false,error:'找不到這個姓名，請確認是否為全名，或改輸入手機號碼。'});
+    return Promise.resolve({ok:true,k:'DEMO0'});
+  }
+  const D=window.DEMO_DATA;
+  let ix=0; if(ADM_STATION)ix=ADM_STATION-785; else{const m=/^DEMO(\d+)$/.exec(K||'');if(m)ix=+m[1];}
+  const st=D.stations[ix]||D.stations[0];
+  if(body) return new Promise(r=>setTimeout(()=>r({ok:true,sid:st[0],li:st[1],name:st[2],valid:Object.values(body.votes).reduce((a,b)=>a+Number(b),0),invalid:Number(body.invalid||0),flags:[],time:Date.now(),count:0}),500));
+  const sib=ADM_STATION?[]:[0,1,2].map(i=>({k:'DEMO'+i,sid:D.stations[i][0],li:D.stations[i][1],name:D.stations[i][2],done:i===1?Date.now()-600000:0}));
+  return Promise.resolve({ok:true,name:'示範志工',station:{id:st[0],li:st[1],name:st[2]},cands:D.cands,open:true,note:'請等「議員」票數唱完、開票報告單簽核後再回報。',existing:null,siblings:sib});
+}
+
+/* ---------- 統一入口：手機號碼 或 全名 ---------- */
+let LG={q:'',choose:null,pickname:null}, JUST=false;
+function showLogin(msg){
+  $('place').textContent='開票回報登入'; $('sid').textContent='請先確認身分'; $('who').textContent='';
+  hideBar();
+  if(LG.pickname){ renderPickName(msg); return; }
+  if(LG.choose){ renderChoose(msg); return; }
+  $('app').innerHTML=`<div class="codebox">
+    <p class="muted" style="font-size:16px">請輸入您的<b>手機號碼</b>或<b>全名</b>：</p>
+    <input id="lq" placeholder="手機號碼 或 全名" autocomplete="off" enterkeyhint="go" value="${esc(LG.q)}">
+    ${msg?`<div class="err">${esc(msg)}</div>`:''}
+    <button class="btn block" id="lgo" style="margin-top:14px">登入</button>
+    <p class="muted" style="font-size:13px;margin-top:14px">手機號碼請輸入 10 碼（例：0912345678）。全名請完整輸入，不用加職稱。</p></div>`;
+  const go=async()=>{
+    const btn=$('lgo'); btn.disabled=true; btn.textContent='確認中…';
+    LG.q=$('lq').value.trim();
+    if(!LG.q){btn.disabled=false;btn.textContent='登入';return;}
+    try{
+      const r=await api(null,{action:'login',q:LG.q});
+      if(!r.ok){ showLogin(r.error); return; }
+      if(r.pickname){ LG.pickname=r.pickname; showLogin(''); return; }
+      if(r.choose){ LG.choose=r.choose; showLogin(''); return; }
+      enter(r.k);
+    }catch(e){ showLogin('網路不穩，請稍後再按一次。'); }
+  };
+  $('lgo').onclick=go; const inp=$('lq'); inp.onkeydown=e=>{if(e.key==='Enter')go();}; inp.focus();
+}
+function enter(k){ K=k; LG={q:'',choose:null,pickname:null}; JUST=true; try{localStorage.setItem('ek',K);}catch(e){} boot(); }
+function renderPickName(msg){
+  $('app').innerHTML=`<div class="codebox"><h2 style="margin:6px 0">請選擇您的名字</h2>
+   <p class="muted" style="font-size:16px">這支手機號碼有 ${LG.pickname.length} 位使用者，請點選<b>您本人</b>：</p>
+   ${LG.pickname.map((c,i)=>`<button class="pk pkn" data-i="${i}"${c.k?'':' disabled'}><span class="pn" style="font-size:22px">${esc(c.name)}</span></button>`).join('')}
+   ${msg?`<div class="err">${esc(msg)}</div>`:''}
+   <button class="btn ghost block" id="lback" style="margin-top:10px">重新輸入</button></div>`;
+  document.querySelectorAll('.pkn').forEach(b=>b.onclick=()=>enter(LG.pickname[+b.dataset.i].k));
+  $('lback').onclick=()=>{LG={q:'',choose:null,pickname:null};showLogin('');};
+}
+function renderChoose(msg){
+  $('app').innerHTML=`<div class="codebox"><h2 style="margin:6px 0">有 ${LG.choose.length} 位同名的志工</h2>
+   <p class="muted" style="font-size:16px">請選擇<b>您負責的投開票所</b>：</p>
+   ${LG.choose.map((c,i)=>`<button class="pk" data-i="${i}"${c.k?'':' disabled'}><span class="pn">${c.stations.map(s=>pad(s.sid)+' '+esc(s.name)).join('<br>')}${c.more?`<small>…還有 ${c.more} 所</small>`:''}</span></button>`).join('')}
+   ${msg?`<div class="err">${esc(msg)}</div>`:''}
+   <button class="btn ghost block" id="lback" style="margin-top:10px">重新輸入</button></div>`;
+  document.querySelectorAll('.pk').forEach(b=>b.onclick=()=>enter(LG.choose[+b.dataset.i].k));
+  $('lback').onclick=()=>{LG={q:'',choose:null,pickname:null};showLogin('');};
+}
+function logout(){ K=''; JUST=false; LG={q:'',choose:null,pickname:null}; try{localStorage.removeItem('ek');}catch(e){} showLogin(''); }
+/* ---------- 一人負責多所：清單與切換 ---------- */
+let SIB=[];
+const hm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+function renderPicker(first){
+  hideBar();
+  const left=SIB.filter(s=>!s.done).length;
+  $('app').innerHTML=`<div style="padding:6px 0"><h2 style="margin:14px 0 4px">${first?'您負責 '+SIB.length+' 個投開票所':'切換投開票所'}</h2>
+   <p class="muted" style="margin:0 0 10px">${first?`${esc(me.name)}，`:''}請選擇現在要回報的投開票所（已回報 ${SIB.length-left} 所，尚有 ${left} 所）。送出一所後，可以直接前往下一所。</p>
+   ${SIB.map(s=>`<button class="pk${s.k===K?' cur':''}" data-k="${esc(s.k)}"><span class="no4">${pad(s.sid)}</span><span class="pn">${esc(s.name)}<small>${esc(s.li)}</small></span><span class="st ${s.done?'ok':'no'}">${s.done?'已回報 '+hm(s.done):'未回報'}</span></button>`).join('')}</div>`;
+  document.querySelectorAll('.pk').forEach(b=>b.onclick=()=>pickStation(b.dataset.k));
+  window.scrollTo(0,0);
+}
+function pickStation(k){ K=k; JUST=false; try{localStorage.setItem('ek',K);}catch(e){} boot(); }
+async function openPicker(){ try{ const r=await api({action:'me',k:K}); if(r.ok&&r.siblings&&r.siblings.length)SIB=r.siblings; }catch(e){} renderPicker(false); }
+
+function renderWho(){
+  hideBar();
+  $('app').innerHTML=`<div class="big"><h1>請確認是您本人</h1>
+   <p style="font-size:22px;margin:6px 0">${esc(me.name)}</p>
+   <p style="font-size:22px;font-weight:700;line-height:1.5">負責 第 ${pad(me.station.id)} 投開票所<br>${esc(me.station.name)}（${esc(me.station.li)}）</p>
+   <button class="btn block" id="yes" style="margin-top:14px">沒錯，開始報票</button>
+   <button class="btn ghost block" id="no" style="margin-top:10px">不是我，重新登入</button></div>`;
+  $('yes').onclick=renderForm; $('no').onclick=logout;
+}
+
+async function boot(){
+  $('demo').classList.toggle('hide',!DEMO);
+  try{
+    let res;
+    if(ADM_STATION){ if(!ADM&&!DEMO){$('app').innerHTML='<p class="err">代報模式需要先登入總部後台（請從後台的「代報」按鈕進入）。</p>';return;}
+      res=await api({action:'station',token:ADM,id:ADM_STATION}); }
+    else { if(!K){showLogin();return;} res=await api({action:'me',k:K}); }
+    if(!res.ok){ if(ADM_STATION){$('app').innerHTML=`<p class="err">${esc(res.error)}</p>`;return;}
+      K='';try{localStorage.removeItem('ek');}catch(e){} showLogin(qs.get('k')?'這個連結已失效，請改用手機號碼登入。':''); return; }
+    me=res; SIB=me.siblings||[];
+    if(K&&!ADM_STATION){try{localStorage.setItem('ek',K);}catch(e){}}
+    $('sid').textContent='第 '+pad(me.station.id)+' 投開票所'+(ADM_STATION?'（總部代報）':'');
+    $('place').textContent=me.station.name+'（'+me.station.li+'）';
+    $('who').innerHTML=ADM_STATION?'代報人：總部':'報票人：'+esc(me.name)+'　<a href="#" id="sw" style="color:#fff;text-decoration:underline;font-size:12px">不是我？換人</a>'+(SIB.length>1?'　<a href="#" id="sx" style="color:#ffd24d;text-decoration:underline;font-size:12px;font-weight:700">切換投開票所（共 '+SIB.length+' 所）</a>':'');
+    if($('sx'))$('sx').onclick=e=>{e.preventDefault();openPicker();};
+    if($('sw'))$('sw').onclick=e=>{e.preventDefault();if(confirm('要登出並重新登入嗎？（尚未送出的草稿會保留在這支手機）'))logout();};
+    document.title='開票回報 '+pad(me.station.id);
+    vals={};me.cands.forEach(c=>vals[c.no]='');
+    let draft=null;try{draft=JSON.parse(localStorage.getItem('draft_'+me.station.id)||'null');}catch(e){}
+    existingNote='';
+    if(me.existing){
+      const e=me.existing;
+      me.cands.forEach(c=>vals[c.no]=e.votes[c.no]===''||e.votes[c.no]==null?'':String(e.votes[c.no]));
+      invalid=e.invalid===''||e.invalid==null||Number(e.invalid)===0?'':String(e.invalid); declared=e.declared===''||e.declared==null?'':String(e.declared);
+      const d=new Date(e.time);
+      existingNote=`此投開票所已在 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} 回報過。下面是目前系統裡的數字，修改後再送出會覆蓋舊的。`;
+    } else if(draft&&draft.vals){
+      Object.assign(vals,draft.vals);invalid=draft.invalid||'';declared=draft.declared||'';
+      existingNote='draft';
+    }
+    if(JUST&&!ADM_STATION){ JUST=false; if(SIB.length>1) renderPicker(true); else renderWho(); return; }
+    renderForm();
+  }catch(e){
+    $('app').innerHTML=`<div class="banner b-red">連不上系統（可能是網路不穩）。請確認手機有訊號後再試一次。</div><button class="btn block" onclick="location.reload()">重新載入</button>`;
+  }
+}
+
+function saveDraft(){ if(!me)return; try{localStorage.setItem('draft_'+me.station.id,JSON.stringify({vals,invalid,declared}));}catch(e){} }
+function total(){return me.cands.reduce((a,c)=>a+(vals[c.no]===''?0:Number(vals[c.no])),0);}
+function filled(){return me.cands.filter(c=>vals[c.no]!=='').length;}
+function updBar(){ $('cnt').textContent=filled(); $('tot').textContent=me.cands.length; }   /* 刻意不顯示即時加總：讓「報告單有效票數」成為獨立驗證，而不是照抄系統加總 */
+
+function renderForm(){
+  if(!me.open){ hideBar(); $('app').innerHTML=`<div class="banner b-amb">目前尚未開放回報，請等總部通知。</div>`; return; }
+  let h='';
+  if(me.note) h+=`<div class="banner b-g">${esc(me.note)}</div>`;
+  if(existingNote==='draft') h+=`<div class="banner b-amb">已為您還原上次沒送出的草稿。</div>`;
+  else if(existingNote) h+=`<div class="banner b-amb">${esc(existingNote)}</div>`;
+  h+='<div class="card">'+me.cands.map(c=>`<div class="row${vals[c.no]!==''?' filled':''}" data-no="${c.no}">
+    <div class="no">${c.no}</div><div><div class="nm">${esc(c.name)}</div><div class="pt">${esc(c.party)}</div></div>
+    <input class="n" readonly inputmode="none" autocomplete="off" data-no="${c.no}" value="${esc(vals[c.no])}" aria-label="${c.no}號 ${esc(c.name)} 得票數"></div>`).join('')+'</div>';
+  h+=`<div class="card extra">
+    <label>無效票數 <span class="hint">（選填）</span></label>
+    <input class="n" id="inv" readonly inputmode="none" value="${esc(invalid)}">
+    <label>開票報告單上的「有效票數」<span class="hint">（選填。填了，系統會幫您核對加總有沒有算錯）</span></label>
+    <input class="n" id="dec" readonly inputmode="none" value="${esc(declared)}"></div>`;
+  $('app').innerHTML=h; $('bar').classList.remove('hide'); updBar();
+  ACT=null; $('pad').classList.add('hide'); $('bar').classList.remove('padopen');
+  INPUTS=[...document.querySelectorAll('input.n')];
+  document.querySelectorAll('.row').forEach(r=>r.addEventListener('pointerdown',e=>{e.preventDefault();activate(r.querySelector('input.n'));}));
+  ['inv','dec'].forEach(id=>$(id).addEventListener('pointerdown',e=>{e.preventDefault();activate($(id));}));
+  $('go').textContent='檢查並送出'; $('go').onclick=()=>{closePad();renderConfirm();};
+  window.scrollTo(0,0);
+  activate(INPUTS[0]);   // 進來就直接可以輸入第一位
+}
+
+/* ---------- 自製數字鍵盤 ---------- */
+let ACT=null, FRESH=false, INPUTS=[];
+function adjust(){ const b=$('bar'); document.body.style.paddingBottom=(b.classList.contains('hide')?24:b.offsetHeight+24)+'px'; }
+function hideBar(){ $('bar').classList.add('hide'); adjust(); }
+function setVal(el,v){
+  el.value=v;
+  if(el.id==='inv')invalid=v; else if(el.id==='dec')declared=v;
+  else { vals[el.dataset.no]=v; el.closest('.row').classList.toggle('filled',v!==''); }
+  saveDraft(); updBar();
+}
+function activate(el){
+  if(ACT)ACT.classList.remove('act');
+  document.querySelectorAll('.row.cur').forEach(r=>r.classList.remove('cur'));
+  ACT=el; FRESH=el.value!==''; el.classList.add('act');
+  const row=el.closest('.row'); if(row)row.classList.add('cur');
+  $('padlab').textContent='輸入中：'+(row?row.dataset.no+' 號 '+row.querySelector('.nm').textContent:(el.id==='inv'?'無效票數':'報告單有效票數'));
+  const last=INPUTS.indexOf(el)>=INPUTS.length-1;
+  $('padnext').textContent=last?'完成':'下一筆 ▸';
+  $('pad').classList.remove('hide'); $('bar').classList.add('padopen'); adjust(); scrollToAct();
+}
+function scrollToAct(){
+  setTimeout(()=>{
+    if(!ACT)return;
+    const box=(ACT.closest('.row')||ACT.closest('.extra')).getBoundingClientRect();
+    const barTop=$('bar').getBoundingClientRect().top, hdr=document.querySelector('header.top').offsetHeight;
+    if(box.bottom>barTop-8) window.scrollBy(0,box.bottom-barTop+16);
+    else if(box.top<hdr+8) window.scrollBy(0,box.top-hdr-16);
+  },30);
+}
+function press(k){
+  if(!ACT)return;
+  let v=ACT.value;
+  if(k==='bk'){ v=FRESH?'':v.slice(0,-1); }
+  else if(k==='clr'){ v=''; }
+  else { v=(FRESH?'':v)+k; v=v.replace(/^0+(?=\d)/,''); if(v.length>5)return; }
+  FRESH=false; setVal(ACT,v);
+}
+function nextField(){ const i=INPUTS.indexOf(ACT); if(i>=INPUTS.length-1){closePad();return;} activate(INPUTS[i+1]); }
+function closePad(){
+  if(ACT)ACT.classList.remove('act');
+  document.querySelectorAll('.row.cur').forEach(r=>r.classList.remove('cur'));
+  ACT=null; $('pad').classList.add('hide'); $('bar').classList.remove('padopen'); adjust();
+}
+$('keys').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; const k=b.dataset.k; if(k==='next')nextField(); else press(k); });
+$('padclose').addEventListener('click',closePad);
+document.addEventListener('keydown',e=>{            // 電腦鍵盤也能用（測試／備用）
+  if(!ACT)return;
+  if(/^\d$/.test(e.key))press(e.key);
+  else if(e.key==='Backspace'){e.preventDefault();press('bk');}
+  else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();nextField();}
+  else if(e.key==='Escape')closePad();
+});
+
+function renderConfirm(){
+  const blanks=me.cands.filter(c=>vals[c.no]==='');
+  const tot=total(); const inv=invalid===''?0:Number(invalid);
+  let warn='';
+  if(declared!==''&&Number(declared)!==tot) warn+=`<div class="banner b-red"><b>數字對不起來</b>：您填的有效票數是 ${Number(declared).toLocaleString()}，和 ${me.cands.length} 位候選人票數的加總不一致。請回去對照開票報告單，逐筆檢查是否有輸錯。</div>`;
+  if(declared!==''&&Number(declared)===tot) warn+=`<div class="banner b-g">✔ 加總與報告單有效票數相符</div>`;
+  if(tot+inv>1900) warn+=`<div class="banner b-amb">總票數偏多，請確認有沒有多打一位數。</div>`;
+  if(blanks.length) warn+=`<div class="banner b-amb">有 ${blanks.length} 位沒填（${blanks.map(c=>c.no+'號').join('、')}），送出會當作 0 票。</div>`;
+  $('app').innerHTML=`<h2 style="margin:16px 0 4px">請再核對一次</h2><p class="muted" style="margin:0 0 8px">確認每個數字都和開票報告單一致，再按「確認送出」。</p>${warn}
+  <div class="card"><table class="cf">${me.cands.map(c=>`<tr class="${vals[c.no]===''?'blank':''}"><td>${c.no} 號　${esc(c.name)}</td><td>${vals[c.no]===''?'未填':Number(vals[c.no]).toLocaleString()}</td></tr>`).join('')}
+  ${(declared!==''&&Number(declared)!==tot)?'':`<tr><td><b>有效票加總</b></td><td>${tot.toLocaleString()}</td></tr>`}${inv?`<tr><td>無效票</td><td>${inv.toLocaleString()}</td></tr>`:''}</table></div>
+  <div id="msg"></div>
+  <button class="btn block" id="ok" style="margin-top:8px">${blanks.length?'仍要送出（未填視為 0）':'確認送出'}</button>
+  <button class="btn ghost block" id="back" style="margin-top:10px">回去修改</button>`;
+  hideBar(); window.scrollTo(0,0);
+  $('back').onclick=renderForm; $('ok').onclick=send;
+}
+
+async function send(){
+  const btn=$('ok'); btn.disabled=true; btn.textContent='送出中…';
+  if(!reqid)reqid=uid();
+  const v={};me.cands.forEach(c=>v[c.no]=vals[c.no]===''?0:Number(vals[c.no]));
+  const body={action:'submit',votes:v,invalid:invalid===''?0:Number(invalid),declared:declared,reqid:reqid,blanks:me.cands.filter(c=>vals[c.no]==='').map(c=>c.no)};
+  if(ADM_STATION){body.admin=ADM;body.station=me.station.id;} else body.k=K;
+  try{
+    const r=await api(null,body);
+    if(!r.ok){ $('msg').innerHTML=`<div class="banner b-red">${esc(r.error||'送出失敗')}</div>`; btn.disabled=false; btn.textContent='再試一次'; if(/超過合理|不正確|都是 0/.test(r.error||''))reqid=''; return; }
+    try{localStorage.removeItem('draft_'+me.station.id);}catch(e){}
+    renderDone(r);
+  }catch(e){
+    $('msg').innerHTML=`<div class="banner b-red">網路不穩，這次可能沒送出去。<b>資料還保留在這支手機上</b>，請移到訊號較好的地方再按一次「再試一次」（不會重複計算）。</div>`;
+    btn.disabled=false; btn.textContent='再試一次';
+  }
+}
+
+function renderDone(r){
+  reqid=''; const d=new Date(r.time);
+  const curS=SIB.find(s=>s.sid===r.sid); if(curS)curS.done=r.time;          // 本所標為已回報
+  const nxt=SIB.length>1?SIB.find(s=>!s.done&&s.sid!==r.sid):null;           // 還沒回報的下一所
+  const hh=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+  $('app').innerHTML=`<div class="big"><div class="ok">✔</div><h1>已收到，謝謝您！</h1>
+  <p class="muted">第 ${pad(r.sid)} 投開票所　${hh}<br>有效票加總 <b>${Number(r.valid).toLocaleString()}</b>${r.invalid?`　無效票 ${r.invalid}`:''}</p>
+  ${r.flags&&r.flags.length?`<div class="banner b-amb" style="text-align:left">系統提醒：${esc(r.flags.join('；'))}。總部會跟您確認，不用擔心。</div>`:''}
+  <p class="muted">若發現填錯，直接按下面按鈕更正再送出一次，<b>以最後一次為準</b>。</p>
+  ${nxt?`<button class="btn block" id="nextst" style="margin-top:6px">前往下一所：${pad(nxt.sid)} ${esc(nxt.name)} ▸</button>`:''}
+  ${SIB.length>1?`<p class="muted" style="margin:10px 0 4px">${nxt?`還有 ${SIB.filter(s=>!s.done).length} 所尚未回報。`:'您負責的投開票所都已回報完畢，辛苦了！'}</p>`:''}
+  <button class="btn ghost block" id="fix" style="margin-top:8px">更正這一所</button>
+  ${SIB.length>1?'<button class="btn ghost block" id="listst" style="margin-top:8px">回到我的投開票所清單</button>':''}</div>`;
+  hideBar(); window.scrollTo(0,0);
+  $('fix').onclick=()=>{ existingNote='此為您剛送出的數字，修改後再送出會覆蓋。'; renderForm(); };
+  if($('nextst'))$('nextst').onclick=()=>pickStation(nxt.k);
+  if($('listst'))$('listst').onclick=()=>renderPicker(false);
+}
+
+boot();
+})();
+</script>
+</body>
+</html>
