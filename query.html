@@ -204,7 +204,9 @@ function rankOf(arr,i,key){ let r=1; for(let j=0;j<arr.length;j++) if(arr[j][key
 
 /* ---------- 渲染 ---------- */
 function render(){
-  $('demo').classList.toggle('hide',!DEMO);
+  const REH=!DEMO&&D.status==='open'&&D.openAt&&Date.now()<new Date(D.openAt).getTime();   // 演練期間（開放時間前就顯示票數）
+  if(REH)$('demo').textContent='演練資料：目前顯示的是演練期間的測試資料，非真實開票結果';
+  $('demo').classList.toggle('hide',!(DEMO||REH));
   $('title').textContent=D.title||'開票即時'; $('sub').textContent=D.sub||'';
   document.title=(D.title||'開票即時');
   pill();

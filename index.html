@@ -196,7 +196,10 @@ function build(){
 }
 function render(){
   $('title').textContent=D.title||'開票即時';
-  $('sub').innerHTML=esc(D.sub||'')+(DEMO?'　<span style="color:#946a08;font-weight:800;background:#f1e2bd;border-radius:6px;padding:0 8px">示範資料・假數字</span>':'');
+  // 演練標示：投票結束前（開放時間之前）就顯示票數＝演練模式，明確標示「非真實票數」，避免截圖外流被誤認
+  const REH=!DEMO&&D.status==='open'&&D.openAt&&Date.now()<new Date(D.openAt).getTime();
+  const tag=t=>'　<span style="color:#946a08;font-weight:800;background:#f1e2bd;border-radius:6px;padding:0 8px">'+t+'</span>';
+  $('sub').innerHTML=esc(D.sub||'')+(DEMO?tag('示範資料・假數字'):REH?tag('演練資料・非真實票數'):'');
   if(D.status==='closed'){
     $('closed').style.display='flex';
     let t='';if(D.openAt){const d=new Date(D.openAt);if(!isNaN(d))t=`預計 ${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} 起提供即時票數`;}
