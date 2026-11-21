@@ -271,9 +271,8 @@ async function boot(){
     if(K&&!ADM_STATION){try{localStorage.setItem('ek',K);}catch(e){}}
     $('sid').textContent='第 '+pad(me.station.id)+' 投開票所'+(ADM_STATION?'（總部代報）':'');
     $('place').textContent=me.station.name+'（'+me.station.li+'）';
-    $('who').innerHTML=ADM_STATION?'代報人：總部':'<div style="margin-bottom:6px">報票人：'+esc(me.name)+'</div><div class="hbtns"><button type="button" class="hb" id="sw">不是我本人</button>'+(SIB.length>1?'<button type="button" class="hb hb2" id="sx">切換投開票所（共 '+SIB.length+' 所）</button>':'')+'<button type="button" class="hb" id="lo">登出</button></div>';
+    $('who').innerHTML=ADM_STATION?'代報人：總部':'<div style="margin-bottom:6px">報票人：'+esc(me.name)+'</div><div class="hbtns">'+(SIB.length>1?'<button type="button" class="hb hb2" id="sx">切換投開票所（共 '+SIB.length+' 所）</button>':'')+'<button type="button" class="hb" id="lo">登出</button></div>';
     if($('sx'))$('sx').onclick=e=>{e.preventDefault();openPicker();};
-    if($('sw'))$('sw').onclick=e=>{e.preventDefault();if(confirm('這不是您本人嗎？\n要登出，讓本人重新登入嗎？（尚未送出的草稿會保留在這支手機）'))logout();};
     if($('lo'))$('lo').onclick=e=>{e.preventDefault();if(confirm('要登出嗎？\n登出後需要重新輸入手機號碼或全名才能報票。（尚未送出的草稿會保留在這支手機）'))logout();};
     document.title='2026桃園市議員選舉中壢區開票回報';
     vals={};me.cands.forEach(c=>vals[c.no]='');
@@ -282,11 +281,11 @@ async function boot(){
     if(me.existing){
       const e=me.existing;
       me.cands.forEach(c=>vals[c.no]=e.votes[c.no]===''||e.votes[c.no]==null?'':String(e.votes[c.no]));
-      invalid=e.invalid===''||e.invalid==null||Number(e.invalid)===0?'':String(e.invalid); declared=e.declared===''||e.declared==null?'':String(e.declared);
+      invalid=''; declared='';   // 無效票／報告單有效票欄位已取消，不帶舊值
       const d=new Date(e.time);
       existingNote=`此投開票所已在 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} 回報過。下面是目前系統裡的數字，修改後再送出會覆蓋舊的。`;
     } else if(draft&&draft.vals){
-      Object.assign(vals,draft.vals);invalid=draft.invalid||'';declared=draft.declared||'';
+      Object.assign(vals,draft.vals);invalid='';declared='';
       existingNote='draft';
     }
     if(JUST&&!ADM_STATION){ JUST=false; if(SIB.length>1) renderPicker(true); else renderWho(); return; }
@@ -311,16 +310,11 @@ function renderForm(){
   h+='<div class="card">'+me.cands.map(c=>`<div class="row${vals[c.no]!==''?' filled':''}" data-no="${c.no}">
     <div class="no">${c.no}</div><div><div class="nm">${esc(c.name)}</div><div class="pt">${esc(c.party)}</div></div>
     <input class="n" readonly inputmode="none" autocomplete="off" data-no="${c.no}" value="${esc(vals[c.no])}" aria-label="${c.no}號 ${esc(c.name)} 得票數"></div>`).join('')+'</div>';
-  h+=`<div class="card extra">
-    <label>無效票數 <span class="hint">（選填）</span></label>
-    <input class="n" id="inv" readonly inputmode="none" value="${esc(invalid)}">
-    <label>開票報告單上的「有效票數」<span class="hint">（選填。填了，系統會幫您核對加總有沒有算錯）</span></label>
-    <input class="n" id="dec" readonly inputmode="none" value="${esc(declared)}"></div>`;
+
   $('app').innerHTML=h; $('bar').classList.remove('hide'); updBar();
   ACT=null; $('pad').classList.add('hide'); $('bar').classList.remove('padopen');
   INPUTS=[...document.querySelectorAll('input.n')];
   document.querySelectorAll('.row').forEach(r=>r.addEventListener('pointerdown',e=>{e.preventDefault();activate(r.querySelector('input.n'));}));
-  ['inv','dec'].forEach(id=>$(id).addEventListener('pointerdown',e=>{e.preventDefault();activate($(id));}));
   $('go').textContent='檢查並送出'; $('go').onclick=()=>{closePad();renderConfirm();};
   window.scrollTo(0,0);
   activate(INPUTS[0]);   // 進來就直接可以輸入第一位
