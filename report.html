@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>開票回報</title>
+<title>2026桃園市議員選舉中壢區開票回報</title>
 <style>
 :root{
   --bg:#f4f6f3; --card:#fff; --ink:#16231b; --mute:#5d6b62; --line:#d9e0da;
@@ -170,7 +170,7 @@ function demoApi(p,body){
 let LG={q:'',choose:null,pickname:null}, JUST=false;
 function showLogin(msg){
   ACT=null; try{$('pad').classList.add('hide');}catch(e){}
-  document.title='開票回報登入';
+  document.title='2026桃園市議員選舉中壢區開票回報';
   $('place').textContent='開票回報登入'; $('sid').textContent='請先確認身分'; $('who').textContent='';
   hideBar();
   if(LG.pickname){ renderPickName(msg); return; }
@@ -275,7 +275,7 @@ async function boot(){
     if($('sx'))$('sx').onclick=e=>{e.preventDefault();openPicker();};
     if($('sw'))$('sw').onclick=e=>{e.preventDefault();if(confirm('這不是您本人嗎？\n要登出，讓本人重新登入嗎？（尚未送出的草稿會保留在這支手機）'))logout();};
     if($('lo'))$('lo').onclick=e=>{e.preventDefault();if(confirm('要登出嗎？\n登出後需要重新輸入手機號碼或全名才能報票。（尚未送出的草稿會保留在這支手機）'))logout();};
-    document.title='開票回報 '+pad(me.station.id);
+    document.title='2026桃園市議員選舉中壢區開票回報';
     vals={};me.cands.forEach(c=>vals[c.no]='');
     let draft=null;try{draft=JSON.parse(localStorage.getItem('draft_'+me.station.id)||'null');}catch(e){}
     existingNote='';
