@@ -73,7 +73,7 @@ a{color:var(--g)} a.btn{display:inline-block;border:1px solid var(--g);border-ra
 </div>
 <div class="wrap hide" id="main">
   <h1>開票總部看板 <span id="st" class="pillw"></span><span id="who" class="who"></span></h1>
-  <div class="sub" id="upd"></div>
+  <div class="sub"><span id="upd"></span> <a href="#" id="rf" style="margin-left:8px;font-weight:700">🔄 立即更新</a></div>
   <div class="cards" id="kpi"></div>
   <div class="bar"><i id="pb" style="width:0"></i></div>
   <div id="teams" class="teams"></div>
@@ -84,7 +84,7 @@ a{color:var(--g)} a.btn{display:inline-block;border:1px solid var(--g);border-ra
     <input class="q" id="q" placeholder="搜尋所號、里、學校、報票人">
   </div>
   <div id="tbl"></div>
-  <p class="small">「代報」：志工沒電／沒訊號、改由電話回報時，總部可代為輸入（會記為「總部代報（您的姓名・服務處）」，並顯示在該所的狀態欄）。畫面每 15 秒自動更新。</p>
+  <p class="small">「代報」：志工沒電／沒訊號、改由電話回報時，總部可代為輸入（會記為「總部代報（您的姓名・服務處）」，並顯示在該所的狀態欄）。畫面每 6 秒自動更新，也可按「立即更新」。</p>
 </div>
 <script src="config.js"></script>
 <script src="data.js"></script>
@@ -111,8 +111,10 @@ async function load(){
     if(!r.ok){ if(/登入/.test(r.error||'')){ TOKEN=''; try{localStorage.removeItem('eadm');}catch(e){} showLogin(r.error); return; } throw new Error(r.error); }
     D=r; if(r.me)ME=r.me; $('login').classList.add('hide'); $('main').classList.remove('hide'); render();
   }catch(e){ if(D)$('upd').textContent='連線失敗，顯示的是舊資料（'+hms(D.now)+'）'; else showLogin('連線失敗：'+e.message); }
-  clearTimeout(TM); TM=setTimeout(load,15000);
+  clearTimeout(TM); TM=setTimeout(load,document.hidden?30000:6000);   // 畫面開著每 6 秒更新、切到背景放慢為 30 秒（後端有 8 秒快取，不會增加試算表負擔）
 }
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&TOKEN){ clearTimeout(TM); load(); } });   // 從代報／別的分頁切回來時立刻更新
+window.addEventListener('focus',()=>{ if(TOKEN){ clearTimeout(TM); load(); } });
 async function loadOffices(){
   let sel=$('ao'); if(!sel||sel.tagName!=='SELECT'||sel.dataset.loaded)return; sel.dataset.loaded='1';
   let offs=[];
@@ -140,6 +142,7 @@ $('ap').onkeydown=e=>{if(e.key==='Enter')doLogin();};
 $('q').oninput=e=>{q=e.target.value.trim();render();};
 let TEAM='';
 $('team').onchange=e=>{TEAM=e.target.value;render();};
+$('rf').onclick=e=>{e.preventDefault();$('upd').textContent='更新中…';clearTimeout(TM);load();};
 document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();});
 
 function render(){
