@@ -87,6 +87,9 @@ input.n.act{border-color:var(--g);background:var(--card);box-shadow:0 0 0 4px rg
 .hide{display:none!important}
 .err{color:var(--red);font-weight:600;margin:10px 0}
 .demo{background:#b9770e;color:#fff;text-align:center;font-size:13px;padding:4px}
+.hbtns{display:flex;flex-wrap:wrap;gap:8px}
+.hb{min-height:36px;padding:4px 12px;border:1.5px solid #fff;border-radius:10px;background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:700;-webkit-tap-highlight-color:transparent}
+.hb2{background:#ffd24d;border-color:#ffd24d;color:#3a2a00}
 </style>
 </head>
 <body>
@@ -167,6 +170,7 @@ function demoApi(p,body){
 let LG={q:'',choose:null,pickname:null}, JUST=false;
 function showLogin(msg){
   ACT=null; try{$('pad').classList.add('hide');}catch(e){}
+  document.title='開票回報登入';
   $('place').textContent='開票回報登入'; $('sid').textContent='請先確認身分'; $('who').textContent='';
   hideBar();
   if(LG.pickname){ renderPickName(msg); return; }
@@ -210,11 +214,28 @@ function renderChoose(msg){
   document.querySelectorAll('.pk').forEach(b=>b.onclick=()=>enter(LG.choose[+b.dataset.i].k));
   $('lback').onclick=()=>{LG={q:'',choose:null,pickname:null};showLogin('');};
 }
-function logout(){ K=''; JUST=false; LG={q:'',choose:null,pickname:null}; try{localStorage.removeItem('ek');}catch(e){} showLogin(''); }
+function logout(){ CUR='login'; K=''; JUST=false; LG={q:'',choose:null,pickname:null}; try{localStorage.removeItem('ek');}catch(e){} showLogin(''); }
 /* ---------- 一人負責多所：清單與切換 ---------- */
 let SIB=[];
 const hm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+/* ---- 瀏覽器「上一頁」支援：清單→填票→核對 各是一頁 ---- */
+let CUR='', HFIRST=true;
+function setView(v,replace){
+  if(CUR===v)return; CUR=v;
+  try{ if(HFIRST||replace){ history.replaceState({v},''); HFIRST=false; } else history.pushState({v},''); }catch(e){}
+}
+window.addEventListener('popstate',e=>{
+  const v=e.state&&e.state.v; if(!v)return;
+  if(!K&&!ADM_STATION){ CUR='login'; showLogin(''); return; }
+  CUR=v; ACT=null; try{$('pad').classList.add('hide');}catch(x){}
+  if(v==='picker') openPicker();
+  else if(v==='form'&&me) renderForm();
+  else if(v==='confirm'&&me) renderConfirm();
+  else if(v==='who'&&me) renderWho();
+  else if(v==='done'&&me) renderForm();
+});
 function renderPicker(first){
+  setView('picker');
   hideBar();
   const left=SIB.filter(s=>!s.done).length;
   $('app').innerHTML=`<div style="padding:6px 0"><h2 style="margin:14px 0 4px">${first?'您負責 '+SIB.length+' 個投開票所':'切換投開票所'}</h2>
@@ -227,6 +248,7 @@ function pickStation(k){ K=k; JUST=false; try{localStorage.setItem('ek',K);}catc
 async function openPicker(){ try{ const r=await api({action:'me',k:K}); if(r.ok&&r.siblings&&r.siblings.length)SIB=r.siblings; }catch(e){} renderPicker(false); }
 
 function renderWho(){
+  setView('who');
   hideBar();
   $('app').innerHTML=`<div class="big"><h1>請確認是您本人</h1>
    <p style="font-size:22px;margin:6px 0">${esc(me.name)}</p>
@@ -249,9 +271,10 @@ async function boot(){
     if(K&&!ADM_STATION){try{localStorage.setItem('ek',K);}catch(e){}}
     $('sid').textContent='第 '+pad(me.station.id)+' 投開票所'+(ADM_STATION?'（總部代報）':'');
     $('place').textContent=me.station.name+'（'+me.station.li+'）';
-    $('who').innerHTML=ADM_STATION?'代報人：總部':'報票人：'+esc(me.name)+'　<a href="#" id="sw" style="color:#fff;text-decoration:underline;font-size:12px">不是我？換人</a>'+(SIB.length>1?'　<a href="#" id="sx" style="color:#ffd24d;text-decoration:underline;font-size:12px;font-weight:700">切換投開票所（共 '+SIB.length+' 所）</a>':'');
+    $('who').innerHTML=ADM_STATION?'代報人：總部':'<div style="margin-bottom:6px">報票人：'+esc(me.name)+'</div><div class="hbtns"><button type="button" class="hb" id="sw">不是我本人</button>'+(SIB.length>1?'<button type="button" class="hb hb2" id="sx">切換投開票所（共 '+SIB.length+' 所）</button>':'')+'<button type="button" class="hb" id="lo">登出</button></div>';
     if($('sx'))$('sx').onclick=e=>{e.preventDefault();openPicker();};
-    if($('sw'))$('sw').onclick=e=>{e.preventDefault();if(confirm('要登出並重新登入嗎？（尚未送出的草稿會保留在這支手機）'))logout();};
+    if($('sw'))$('sw').onclick=e=>{e.preventDefault();if(confirm('這不是您本人嗎？\n要登出，讓本人重新登入嗎？（尚未送出的草稿會保留在這支手機）'))logout();};
+    if($('lo'))$('lo').onclick=e=>{e.preventDefault();if(confirm('要登出嗎？\n登出後需要重新輸入手機號碼或全名才能報票。（尚未送出的草稿會保留在這支手機）'))logout();};
     document.title='開票回報 '+pad(me.station.id);
     vals={};me.cands.forEach(c=>vals[c.no]='');
     let draft=null;try{draft=JSON.parse(localStorage.getItem('draft_'+me.station.id)||'null');}catch(e){}
@@ -279,6 +302,7 @@ function filled(){return me.cands.filter(c=>vals[c.no]!=='').length;}
 function updBar(){ $('cnt').textContent=filled(); $('tot').textContent=me.cands.length; }   /* 刻意不顯示即時加總：讓「報告單有效票數」成為獨立驗證，而不是照抄系統加總 */
 
 function renderForm(){
+  setView('form');
   if(!me.open){ hideBar(); $('app').innerHTML=`<div class="banner b-amb">目前尚未開放回報，請等總部通知。</div>`; return; }
   let h='';
   if(me.note) h+=`<div class="banner b-g">${esc(me.note)}</div>`;
@@ -357,6 +381,7 @@ document.addEventListener('keydown',e=>{            // 電腦鍵盤也能用（�
 });
 
 function renderConfirm(){
+  setView('confirm');
   const blanks=me.cands.filter(c=>vals[c.no]==='');
   const tot=total(); const inv=invalid===''?0:Number(invalid);
   let warn='';
@@ -371,7 +396,7 @@ function renderConfirm(){
   <button class="btn block" id="ok" style="margin-top:8px">${blanks.length?'仍要送出（未填視為 0）':'確認送出'}</button>
   <button class="btn ghost block" id="back" style="margin-top:10px">回去修改</button>`;
   hideBar(); window.scrollTo(0,0);
-  $('back').onclick=renderForm; $('ok').onclick=send;
+  $('back').onclick=()=>{ if(CUR==='confirm'&&history.length>1){history.back();} else renderForm(); }; $('ok').onclick=send;
 }
 
 async function send(){
@@ -394,6 +419,7 @@ async function send(){
 }
 
 function renderDone(r){
+  setView('done',true);
   reqid=''; const d=new Date(r.time);
   const curS=SIB.find(s=>s.sid===r.sid); if(curS)curS.done=r.time;          // 本所標為已回報
   const nxt=SIB.length>1?SIB.find(s=>!s.done&&s.sid!==r.sid):null;           // 還沒回報的下一所
