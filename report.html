@@ -166,13 +166,14 @@ function demoApi(p,body){
 /* ---------- 統一入口：手機號碼 或 全名 ---------- */
 let LG={q:'',choose:null,pickname:null}, JUST=false;
 function showLogin(msg){
+  ACT=null; try{$('pad').classList.add('hide');}catch(e){}
   $('place').textContent='開票回報登入'; $('sid').textContent='請先確認身分'; $('who').textContent='';
   hideBar();
   if(LG.pickname){ renderPickName(msg); return; }
   if(LG.choose){ renderChoose(msg); return; }
   $('app').innerHTML=`<div class="codebox">
     <p class="muted" style="font-size:16px">請輸入您的<b>手機號碼</b>或<b>全名</b>：</p>
-    <input id="lq" placeholder="手機號碼 或 全名" autocomplete="off" enterkeyhint="go" value="${esc(LG.q)}">
+    <input id="lq" placeholder="手機號碼 或 全名" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" value="${esc(LG.q)}">
     ${msg?`<div class="err">${esc(msg)}</div>`:''}
     <button class="btn block" id="lgo" style="margin-top:14px">登入</button>
     <p class="muted" style="font-size:13px;margin-top:14px">手機號碼請輸入 10 碼（例：0912345678）。全名請完整輸入，不用加職稱。</p></div>`;
@@ -188,7 +189,7 @@ function showLogin(msg){
       enter(r.k);
     }catch(e){ showLogin('網路不穩，請稍後再按一次。'); }
   };
-  $('lgo').onclick=go; const inp=$('lq'); inp.onkeydown=e=>{if(e.key==='Enter')go();}; inp.focus();
+  $('lgo').onclick=go; const inp=$('lq'); inp.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229)go();}; inp.focus();
 }
 function enter(k){ K=k; LG={q:'',choose:null,pickname:null}; JUST=true; try{localStorage.setItem('ek',K);}catch(e){} boot(); }
 function renderPickName(msg){
@@ -348,6 +349,7 @@ $('keys').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!
 $('padclose').addEventListener('click',closePad);
 document.addEventListener('keydown',e=>{            // 電腦鍵盤也能用（測試／備用）
   if(!ACT)return;
+  const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA')&&!t.readOnly)return;   // 在一般輸入框打字(如登入)時不攔截，否則刪除鍵會失效
   if(/^\d$/.test(e.key))press(e.key);
   else if(e.key==='Backspace'){e.preventDefault();press('bk');}
   else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();nextField();}
