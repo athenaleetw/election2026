@@ -450,7 +450,9 @@ async function send(){
         last='busy'; setMode('busy');
       } else if(a.kind==='busy'){ last='busy'; setMode('busy'); }
       else last='net';
-      const pause=Math.min(1500+Math.random()*2500+Math.min(i,4)*1000, TOTAL-(Date.now()-T0)-2000);
+      /* 系統忙：越忙等越久（約 3→6→12→20 秒，每支手機隨機錯開），避免大家同時擠回來；訊號差：短間隔再試 */
+      const base=last==='busy'?[3000,6000,12000,20000][Math.min(i,3)]*(0.6+Math.random()*0.8):1500+Math.random()*2500+Math.min(i,4)*1000;
+      const pause=Math.min(base, TOTAL-(Date.now()-T0)-2000);
       if(pause<=0)break; await sleep(pause);
     }
   } finally { clearInterval(timer); }
