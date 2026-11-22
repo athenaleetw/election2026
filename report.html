@@ -337,12 +337,14 @@ function renderForm(){
   h+='<div class="card">'+me.cands.map(c=>`<div class="row${vals[c.no]!==''?' filled':''}" data-no="${c.no}">
     <div class="no">${c.no}</div><div><div class="nm">${esc(c.name)}</div><div class="pt">${esc(c.party)}</div></div>
     <input class="n" readonly inputmode="none" autocomplete="off" data-no="${c.no}" value="${esc(vals[c.no])}" aria-label="${c.no}號 ${esc(c.name)} 得票數"></div>`).join('')+'</div>';
+  h+='<button class="btn block" id="go2" style="margin:4px 0 8px">檢查並送出</button>';   // 名單最下方也放送出鈕：數字鍵盤開著時往下滑就按得到，不必先收起
 
   $('app').innerHTML=h; $('bar').classList.remove('hide'); updBar();
   ACT=null; $('pad').classList.add('hide'); $('bar').classList.remove('padopen');
   INPUTS=[...document.querySelectorAll('input.n')];
   document.querySelectorAll('.row').forEach(r=>r.addEventListener('pointerdown',e=>{e.preventDefault();activate(r.querySelector('input.n'));}));
   $('go').textContent='檢查並送出'; $('go').onclick=()=>{closePad();renderConfirm();};
+  $('go2').onclick=()=>{closePad();renderConfirm();};
   window.scrollTo(0,0);
   activate(INPUTS[0]);   // 進來就直接可以輸入第一位
 }
