@@ -180,8 +180,10 @@ async function load(){
     failing=true; if(!D){ $('root').innerHTML='<div class="card empty">暫時連不上資料，請稍後重新整理。<br><br><button class="seg on" onclick="location.reload()">重新整理</button></div>'; }
     pill();
   }
-  setTimeout(load, DEMO?4000:(26000+Math.random()*8000));
+  clearTimeout(TM); TM=setTimeout(load, DEMO?4000:(document.hidden?60000:(26000+Math.random()*8000)));   // 切到背景放慢
 }
+let TM=null;
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&D){ clearTimeout(TM); load(); } });   // 切回來馬上更新
 function pill(){
   const p=$('pill'); if(!D){return}
   if(D.status==='closed'){p.classList.remove('stale');$('pilltxt').textContent='尚未開放';return;}

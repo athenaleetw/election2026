@@ -257,8 +257,10 @@ async function load(){
     if(!d||!d.ok)throw new Error('bad');
     D=d;lastOk=Date.now();failing=false;render();
   }catch(e){failing=true;live();}
-  setTimeout(load,DEMO?4000:(14000+Math.random()*4000));
+  clearTimeout(TM); TM=setTimeout(load,DEMO?4000:(document.hidden?30000:5000));   // 畫面開著每 5 秒取一次（後端結果每 10 秒更新）；切到背景放慢為 30 秒
 }
+let TM=null;
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ clearTimeout(TM); load(); } });   // 切回來馬上更新
 load();
 })();
 </script>

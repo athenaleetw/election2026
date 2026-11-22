@@ -58,8 +58,13 @@ a{color:var(--g)} a.btn{display:inline-block;border:1px solid var(--g);border-ra
   .tools{gap:5px}
   .seg{padding:6px 10px;font-size:13.5px}
   input.q,#team{flex:1 1 100%}
+  td .tag{white-space:normal}            /* 手機：狀態欄文字可換行，避免把「代報／解除鎖定」按鈕擠出畫面 */
+  td .small{display:block}
+  td:last-child{width:1%;white-space:nowrap}
 }
 .tag.t-px{background:#fff1c9;color:#7a4b00;border:1px solid #e0a100}
+.tag.t-lk{background:var(--redbg);color:var(--red);font-weight:700}
+button.btn.ub{margin-top:6px;background:var(--card);color:var(--red);border:1px solid var(--red);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -96,6 +101,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const pad=n=>String(n).padStart(4,'0');
 const hms=t=>{const d=new Date(t);return [d.getHours(),d.getMinutes(),d.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':')};
 let TOKEN='';try{TOKEN=localStorage.getItem('eadm')||'';}catch(e){}
+const fl=f=>String(f||'').split('；').filter(x=>x&&!/^已更正|^已鎖定/.test(x)).join('；');   // 更正次數／鎖定另有標籤，不重複顯示
 const px=w=>/^總部代報/.test(w||'')?String(w).replace(/^總部代報[（(]/,'').replace(/[）)]$/,''):'';   // 代報人（含服務處）；志工自己報的回傳空字串
 let D=null,tab='miss',q='',ME=null,TM=null;
 
@@ -181,9 +187,24 @@ function render(){
      <div class="mob">${s.team?`<span class="tag t-of">${esc(s.team)}服務處</span> `:''}${s.rep.length?s.rep.map(r=>`<div>👤 ${esc(r.n)} ${r.p?`<a href="tel:${esc(r.p)}">📞 ${esc(r.p)}</a>`:''}</div>`).join(''):'<span class="tag t-no">無報票人</span>'}</div></td>
    <td class="h">${s.rep.length?s.rep.map(r=>`${esc(r.n)} ${r.p?`<a href="tel:${esc(r.p)}">${esc(r.p)}</a>`:''}`).join('<br>'):'<span class="tag t-no">無報票人</span>'}</td>
    <td class="h">${s.team?`<span class="tag t-of">${esc(s.team)}服務處</span>`:''}</td>
-   <td>${s.done?`<span class="tag t-ok">已回報</span> <span class="small">${hms(s.last)} ${esc(s.valid)}票</span>${s.cnt?` <span class="tag t-w">更正${s.cnt}次</span>`:''}${px(s.who)?`<br><span class="tag t-px">代報：${esc(px(s.who))}</span>`:''}${s.flags?`<br><span class="tag t-w">${esc(s.flags)}</span>`:''}`:'<span class="tag t-no">未回報</span>'}</td>
-   <td><a class="btn" href="${link(s.id)}" target="_blank" rel="noopener">${s.done?'代為更正':'代報'}</a></td></tr>`).join('')}</table>`:'<p class="small">沒有符合的項目 🎉</p>';
+   <td>${s.done?`<span class="tag t-ok">已回報</span> <span class="small">${hms(s.last)} ${esc(s.valid)}票</span>${s.cnt>=(D.limit||3)?`<br><span class="tag t-lk" title="志工已更正${s.cnt}次">🔒 已鎖定</span>`:s.cnt?` <span class="tag t-w">更正${s.cnt}次</span>`:''}${px(s.who)?`<br><span class="tag t-px">代報：${esc(px(s.who))}</span>`:''}${fl(s.flags)?`<br><span class="tag t-w">${esc(fl(s.flags))}</span>`:''}`:'<span class="tag t-no">未回報</span>'}</td>
+   <td><a class="btn" href="${link(s.id)}" target="_blank" rel="noopener">${s.done?'代為更正':'代報'}</a>${s.done&&s.cnt>=(D.limit||3)?`<br><button type="button" class="btn ub" data-ul="${s.id}">解除鎖定</button>`:''}</td></tr>`).join('')}</table>`:'<p class="small">沒有符合的項目 🎉</p>';
 }
+/* 解除鎖定：志工更正次數歸零，可再自己更正（會記錄操作人） */
+document.addEventListener('click',async e=>{
+  const b=e.target.closest&&e.target.closest('button[data-ul]'); if(!b)return;
+  const id=Number(b.dataset.ul), lim=(D&&D.limit)||3;
+  if(!confirm(`確定要解除第 ${pad(id)} 投開票所的鎖定嗎？\n\n解除後，志工可以再自己更正 ${lim} 次。\n這個動作會記錄您的姓名與時間。\n\n（如果只是要改數字，不需要解鎖，直接按「代為更正」即可）`))return;
+  b.disabled=true; b.textContent='解除中…';
+  try{
+    let r;
+    if(DEMO){ const s=D.stations.find(x=>x.id===id); if(s)s.cnt=0; r={ok:true}; }
+    else r=await (await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'unlock',token:TOKEN,station:id})})).json();
+    if(!r.ok){ alert(r.error||'解除失敗'); if(/登入/.test(r.error||''))logout(); }
+    else alert(`已解除第 ${pad(id)} 投開票所的鎖定，志工可以再更正 ${lim} 次。`);
+  }catch(x){ alert('網路不穩，可能沒有解除成功，請稍後再按一次。'); }
+  clearTimeout(TM); load();
+});
 if(TOKEN)load(); else showLogin('');
 })();
 </script>
