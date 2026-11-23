@@ -104,6 +104,38 @@ let TOKEN='';try{TOKEN=localStorage.getItem('eadm')||'';}catch(e){}
 const fl=f=>String(f||'').split('；').filter(x=>x&&!/^已更正|^已鎖定/.test(x)).join('；');   // 更正次數／鎖定另有標籤，不重複顯示
 const px=w=>/^總部代報/.test(w||'')?String(w).replace(/^總部代報[（(]/,'').replace(/[）)]$/,''):'';   // 代報人（含服務處）；志工自己報的回傳空字串
 let D=null,tab='miss',q='',ME=null,TM=null;
+/* 補送機制（2026-11-23）：Google 偶爾把請求「吞掉」（完全沒回應）。等 hedgeMs 還沒回來就再補送一份，先回來的算數。 */
+function hedged(once,hedgeMs,n,total){
+  return new Promise(resolve=>{
+    let done=false,started=0,pending=0,last={kind:'net'}; const ctls=[],timers=[];
+    const finish=v=>{ if(done)return; done=true; timers.forEach(clearTimeout); ctls.forEach(c=>{try{c.abort();}catch(e){}}); resolve(v); };
+    const launch=()=>{
+      if(done||started>=n)return; started++; pending++;
+      const ctl=new AbortController(); ctls.push(ctl);
+      once(ctl.signal).then(v=>{ pending--; if(done)return; if(v.kind==='ok')return finish(v); last=v; if(pending===0)finish(v); });
+      timers.push(setTimeout(launch,hedgeMs));
+    };
+    timers.push(setTimeout(()=>finish(last),total));
+    launch();
+  });
+}
+async function reqOnce(params,body,signal){
+  let r;
+  try{
+    if(body) r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal});
+    else r=await fetch(API+'?'+new URLSearchParams(Object.assign({},params,{_:Date.now()+Math.random().toString(36).slice(2,6)})),{signal});
+  }catch(e){ return {kind:'net'}; }
+  try{ return {kind:'ok',data:await r.json()}; }catch(e){ return signal.aborted?{kind:'net'}:{kind:'busy'}; }
+}
+/* 登入／讀看板：6 秒沒回應就補送（最多 4 份、每輪 25 秒），共 2 輪 */
+async function call(params,body){
+  for(let i=0;i<2;i++){
+    const v=await hedged(sig=>reqOnce(params,body,sig),6000,4,25000);
+    if(v.kind==='ok')return v.data;
+    await new Promise(r=>setTimeout(r,1000+Math.random()*1500));
+  }
+  throw new Error('連線逾時');
+}
 
 function demo(){
   const dd=window.DEMO_DATA; const R=()=>Math.random();
@@ -113,7 +145,7 @@ function demo(){
 async function load(){
   if(!TOKEN){ showLogin(''); return; }
   try{
-    const r=DEMO?demo():await (await fetch(API+'?'+new URLSearchParams({action:'adm',token:TOKEN,_:Date.now()}))).json();
+    const r=DEMO?demo():await call({action:'adm',token:TOKEN});
     if(!r.ok){ if(/登入/.test(r.error||'')){ TOKEN=''; try{localStorage.removeItem('eadm');}catch(e){} showLogin(r.error); return; } throw new Error(r.error); }
     D=r; if(r.me)ME=r.me; $('login').classList.add('hide'); $('main').classList.remove('hide'); render();
   }catch(e){ if(D)$('upd').textContent='連線失敗，顯示的是舊資料（'+hms(D.now)+'）'; else showLogin('連線失敗：'+e.message); }
@@ -124,7 +156,7 @@ window.addEventListener('focus',()=>{ if(TOKEN){ clearTimeout(TM); load(); } });
 async function loadOffices(){
   let sel=$('ao'); if(!sel||sel.tagName!=='SELECT'||sel.dataset.loaded)return; sel.dataset.loaded='1';
   let offs=[];
-  try{ offs=DEMO?['黃崇真服務處','彭俊豪服務處','張曉昀服務處','魏筠服務處']:((await (await fetch(API+'?action=adminopts')).json()).offices||[]); }catch(e){}
+  try{ offs=DEMO?['黃崇真服務處','彭俊豪服務處','張曉昀服務處','魏筠服務處']:((await call({action:'adminopts'})).offices||[]); }catch(e){}
   if(offs.length){ sel.innerHTML='<option value="">請選擇服務處</option>'+offs.map(o=>`<option>${esc(o)}</option>`).join(''); }
   else{ const i=document.createElement('input'); i.id='ao'; i.placeholder='例：黃崇真服務處'; i.autocomplete='off'; sel.replaceWith(i); }
 }
@@ -134,7 +166,7 @@ async function doLogin(){
   if(!name||!office||!code){ $('lerr').textContent='請依序選擇服務處、輸入全名與驗證碼。'; return; }
   const btn=$('lgo'); btn.disabled=true; btn.textContent='驗證中…'; $('lerr').textContent='';
   try{
-    const r=DEMO?{ok:true,token:'DEMO',name,office}:await (await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'adminlogin',name,office,code})})).json();
+    const r=DEMO?{ok:true,token:'DEMO',name,office}:await call(null,{action:'adminlogin',name,office,code});
     if(!r.ok){ $('lerr').textContent=r.error||'登入失敗'; return; }
     TOKEN=r.token; ME={name:r.name,office:r.office}; try{localStorage.setItem('eadm',TOKEN);}catch(e){}
     $('ap').value=''; load();

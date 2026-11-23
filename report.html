@@ -139,33 +139,44 @@ const isLocked=()=>!ADM_STATION&&REP&&CNT>=LIMIT;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 
+/* 補送機制（2026-11-23）：Google 偶爾把請求「吞掉」（完全沒回應）。
+ * 等 hedgeMs 還沒回來，就再補送一份（原本那份不中斷），哪一份先回來就用哪一份；最多 n 份、總上限 total 毫秒。
+ * once(signal) 須回傳 {kind:'ok'|'busy'|'net', data?}。 */
+function hedged(once,hedgeMs,n,total){
+  return new Promise(resolve=>{
+    let done=false,started=0,pending=0,last={kind:'net'}; const ctls=[],timers=[];
+    const finish=v=>{ if(done)return; done=true; timers.forEach(clearTimeout); ctls.forEach(c=>{try{c.abort();}catch(e){}}); resolve(v); };
+    const launch=()=>{
+      if(done||started>=n)return; started++; pending++;
+      const ctl=new AbortController(); ctls.push(ctl);
+      once(ctl.signal).then(v=>{ pending--; if(done)return;
+        if(v.kind==='ok')return finish(v);
+        last=v; if(pending===0)finish(v);       // 其他份都沒在等了才結束
+      });
+      timers.push(setTimeout(launch,hedgeMs));
+    };
+    timers.push(setTimeout(()=>finish(last),total));
+    launch();
+  });
+}
+/* 單次請求（不自己計時，由 hedged 統一控制）：{kind:'ok',data} ／ {kind:'busy'}（有回應但不是正常資料）／ {kind:'net'}（沒回應或中斷） */
+async function reqOnce(params,body,signal){
+  let r;
+  try{
+    if(body) r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal});
+    else r=await fetch(API+'?'+new URLSearchParams(Object.assign({},params,{_:Date.now()+Math.random().toString(36).slice(2,6)})),{signal});
+  }catch(e){ return {kind:'net'}; }
+  try{ return {kind:'ok',data:await r.json()}; }catch(e){ return signal.aborted?{kind:'net'}:{kind:'busy'}; }
+}
 async function api(params,body){
   if(DEMO){ return demoApi(params,body); }
-  /* 網路失敗自動重試（最多 4 次，間隔隨機錯開，避免大家一起撞）。送出票數帶有 reqid，重送不會重複計算。 */
-  let lastErr;
-  for(let i=0;i<4;i++){
-    const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),(body&&body.action==='submit')?75000:20000);   // 送出票數可能排隊，等久一點
-    try{
-      let r;
-      if(body) r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal:ctl.signal});
-      else r=await fetch(API+'?'+new URLSearchParams(params),{signal:ctl.signal});
-      return await r.json();
-    }catch(e){ lastErr=e; }
-    finally{clearTimeout(t);}
-    await new Promise(r=>setTimeout(r,1500+Math.random()*2500+i*1500));
+  /* 登入／載入資料：6 秒沒回應就補送一份（最多 4 份、每輪 25 秒）；整輪都沒成功再等一下重來，共 3 輪 */
+  for(let i=0;i<3;i++){
+    const v=await hedged(sig=>reqOnce(params,body,sig),6000,4,25000);
+    if(v.kind==='ok')return v.data;
+    await sleep(1000+Math.random()*2000);
   }
-  throw lastErr;
-}
-/* 送出票數：單次嘗試。回傳 {kind:'ok',data} ／ {kind:'busy'}（Google 擋下：有回應但不是正常資料）／ {kind:'net'}（完全沒回應或逾時） */
-async function postOnce(body,ms){
-  if(DEMO){ return {kind:'ok',data:await demoApi(null,body)}; }
-  const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),ms);
-  let r;
-  try{ r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal:ctl.signal}); }
-  catch(e){ clearTimeout(t); return {kind:'net'}; }
-  try{ const d=await r.json(); return {kind:'ok',data:d}; }
-  catch(e){ return ctl.signal.aborted?{kind:'net'}:{kind:'busy'}; }
-  finally{ clearTimeout(t); }
+  throw new Error('連線逾時');
 }
 const DEMO_REP={};   // 示範模式：記住各所送過幾次，讓更正上限也能示範
 function demoApi(p,body){
@@ -446,7 +457,8 @@ async function send(){
   try{
     for(let i=0;;i++){
       const left=TOTAL-(Date.now()-T0); if(left<2000)break;
-      const a=await postOnce(body,Math.min(30000,left));
+      /* 12 秒沒回應就補送同一份（同一請求代碼，後端只記一筆），原本那份繼續等；先回來的算數 */
+      const a=DEMO?{kind:'ok',data:await demoApi(null,body)}:await hedged(sig=>reqOnce(null,body,sig),12000,3,Math.min(40000,left));
       if(a.kind==='ok'){
         if(a.data&&(a.data.ok||!/忙碌/.test(a.data.error||''))){ r=a.data; break; }   // 成功，或不是「忙碌」的錯誤（例如票數有誤）
         last='busy'; setMode('busy');
