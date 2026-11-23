@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>系統控制台</title>
+<style>
+:root{--bg:#efe9dd;--card:#faf7f1;--ink:#38332c;--mute:#7c7467;--line:#d9cfbe;--g:#16934a;--gsoft:#dff3e6;--amb:#8a6500;--ambbg:#fbf1c9;--red:#b3261e;--redbg:#fdecea}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.55}
+.wrap{max-width:900px;margin:0 auto;padding:12px 14px 70px}
+h1{font-size:21px;margin:6px 0 2px}
+h2{font-size:17px;margin:0 0 4px}
+.sub{color:var(--mute);font-size:13px}
+.small{font-size:12.5px;color:var(--mute)}
+.hide{display:none!important}
+a{color:var(--g)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:14px 0}
+.sec.danger{border-color:#e7b4ae;background:#fffaf8}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi span{font-size:12.5px;color:var(--mute)}
+.kpi.g b{color:var(--g)} .kpi.w b{color:var(--amb)} .kpi.r b{color:var(--red)}
+.row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .lab{flex:1;min-width:0}
+.row .lab b{font-size:15.5px}
+.row .lab .small{display:block;margin-top:2px}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:0 0 auto}
+.sw button{border:0;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;padding:8px 16px;cursor:pointer;min-width:64px}
+.sw button+button{border-left:1px solid var(--line)}
+.sw button.on{background:var(--g);color:#fff;font-weight:700}
+.sw button.on.off{background:#6d665b}
+input.t,select.t,textarea.t{font:inherit;font-size:15px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);padding:7px 10px}
+textarea.t{width:100%;min-height:62px;resize:vertical}
+.btn{font:inherit;font-size:14.5px;border:1px solid var(--g);background:var(--g);color:#fff;border-radius:9px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.btn.ghost{background:var(--card);color:var(--g)}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn.redg{background:var(--card);color:var(--red);border-color:var(--red)}
+.btn:disabled{opacity:.5;cursor:default}
+.inl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 8px;border-top:1px solid var(--line);text-align:left;vertical-align:middle}
+th{background:var(--gsoft);font-size:12.5px;color:var(--mute);border-top:0}
+td.n{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.tag{font-size:12px;border-radius:5px;padding:1px 7px;white-space:nowrap;display:inline-block}
+.t-ok{background:var(--gsoft);color:var(--g)} .t-w{background:var(--ambbg);color:var(--amb)} .t-no{background:var(--redbg);color:var(--red)}
+.chk{list-style:none;padding:0;margin:6px 0 0}
+.chk li{padding:3px 0;font-size:14.5px}
+details summary{cursor:pointer;color:var(--g);font-weight:700;margin-top:8px}
+.msg{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#2f2a24;color:#fff;padding:10px 18px;border-radius:10px;font-size:15px;z-index:30;max-width:92vw;box-shadow:0 4px 18px rgba(0,0,0,.25)}
+.msg.err{background:var(--red)}
+.mask{position:fixed;inset:0;background:rgba(40,34,28,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.dlg{background:var(--card);border-radius:14px;max-width:440px;width:100%;padding:18px 18px 14px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.dlg h3{margin:0 0 8px;font-size:18px}
+.dlg .body{font-size:15px}
+.dlg .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.login{max-width:360px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.fl{display:block;font-size:13px;color:var(--mute);margin-top:8px}
+.login select,.login input{width:100%;height:46px;font-size:17px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin:6px 0}
+.login button{width:100%;height:46px;border:0;border-radius:10px;background:var(--g);color:#fff;font-size:17px;font-weight:700;margin-top:6px}
+.err{color:var(--red);font-size:14px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.top .who{font-size:13.5px;color:var(--mute)}
+@media(max-width:640px){
+  .wrap{padding:10px 10px 60px}
+  .row{flex-direction:column;gap:8px}
+  .sw button{padding:9px 18px}
+  th.h,td.h{display:none}
+  .cards{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="login" class="login hide">
+  <h1>系統控制台</h1>
+  <div class="sub">僅限系統負責人。請依序<b>選擇服務處</b>、<b>輸入全名</b>、<b>輸入驗證碼</b>。</div>
+  <label class="fl">① 服務處</label><select id="ao"><option value="">載入中…</option></select>
+  <label class="fl">② 全名</label><input id="an" autocomplete="off" placeholder="全名">
+  <label class="fl">③ 驗證碼</label><input id="ap" type="password" inputmode="numeric" autocomplete="off" placeholder="驗證碼">
+  <div class="err" id="lerr"></div><button id="lgo">登入</button>
+  <p class="small" style="margin-top:12px"><a href="admin.html">← 回到總部看板</a></p>
+</div>
+
+<div id="deny" class="login hide">
+  <h1>系統控制台</h1>
+  <p id="denymsg">此功能僅限系統負責人。</p>
+  <p><a href="admin.html">← 回到總部看板</a>　<a href="#" id="denyout">換人登入</a></p>
+</div>
+
+<div class="wrap hide" id="main">
+  <div class="top">
+    <div><h1>⚙ 系統控制台</h1><div class="sub">更新於 <span id="upd"></span>　<a href="#" id="rf" style="font-weight:700">🔄 重新整理</a></div></div>
+    <div class="who"><span id="who"></span>　<a href="admin.html">總部看板</a>　<a href="#" id="out">登出</a></div>
+  </div>
+
+  <div class="cards" id="kpi"></div>
+
+  <div class="sec">
+    <h2>正式開票前檢查</h2>
+    <ul class="chk" id="chk"></ul>
+  </div>
+
+  <div class="sec">
+    <h2>開票設定</h2>
+    <div id="sets"></div>
+    <details>
+      <summary>進階設定（標題、席次等，平常不用改）</summary>
+      <div id="adv"></div>
+    </details>
+  </div>
+
+  <div class="sec">
+    <h2>票數與下載</h2>
+    <div class="small">下載的 CSV 可直接用 Excel 開啟。票數每次按「重新整理」才更新。</div>
+    <div class="inl" style="margin:10px 0">
+      <button class="btn ghost" id="dl1">⬇ 下載各所得票</button>
+      <button class="btn ghost" id="dl2">⬇ 下載回報紀錄</button>
+    </div>
+    <div id="votes"></div>
+  </div>
+
+  <div class="sec">
+    <h2>後台管理人員</h2>
+    <div class="small">名單上的人才能登入總部看板（代報、解除鎖定）。「負責人」才能進這個控制台。刪除後該人會立刻被登出。</div>
+    <div id="adms" style="margin-top:8px"></div>
+    <div class="inl" style="margin-top:12px">
+      <input class="t" id="na" placeholder="全名" style="width:110px">
+      <select class="t" id="no"></select>
+      <input class="t" id="np" placeholder="手機號碼" inputmode="numeric" style="width:140px">
+      <label style="font-size:14px"><input type="checkbox" id="nown"> 負責人</label>
+      <button class="btn" id="nadd">＋ 新增</button>
+    </div>
+  </div>
+
+  <div class="sec danger">
+    <h2 style="color:var(--red)">⚠ 危險操作</h2>
+    <div class="row">
+      <div class="lab"><b>清空所有回報</b><span class="small">清掉全部投開票所的票數與回報紀錄（名冊、設定、管理人員不受影響）。演練結束、正式開票前使用。<b>按下後會先自動下載一份備份。</b></span></div>
+      <button class="btn red" id="clr">清空所有回報</button>
+    </div>
+    <div class="row">
+      <div class="lab"><b>解除登入鎖定</b><span class="small" id="lockinfo">志工或管理人員打錯太多次被暫時鎖住時使用。</span></div>
+      <button class="btn redg" id="unl">解除鎖定</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>操作紀錄</h2>
+    <div class="small">後台登入、控制台的每一個動作都會記在這裡（最近 60 筆）。</div>
+    <div id="ops" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<div id="mask" class="mask hide"><div class="dlg"><h3 id="dt"></h3><div class="body" id="db"></div><div class="acts"><button class="btn ghost" id="dno">取消</button><button class="btn" id="dyes">確定</button></div></div></div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+const API=(window.ELECTION_API||'').trim();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const p2=n=>String(n).padStart(2,'0');
+const dt=t=>{if(!t)return'';const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;};
+const full=t=>{if(!t)return'';const d=new Date(t);return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;};
+let TOKEN='';try{TOKEN=localStorage.getItem('eadm')||'';}catch(e){}
+let I=null,X=null;
+
+/* 補送機制：Google／網路偶爾吞請求時，6 秒沒回應就補送 */
+function hedged(once,hedgeMs,n,total){
+  return new Promise(resolve=>{
+    let done=false,started=0,pending=0,last={kind:'net'};const ctls=[],timers=[];
+    const finish=v=>{if(done)return;done=true;timers.forEach(clearTimeout);ctls.forEach(c=>{try{c.abort();}catch(e){}});resolve(v);};
+    const launch=()=>{if(done||started>=n)return;started++;pending++;const ctl=new AbortController();ctls.push(ctl);
+      once(ctl.signal).then(v=>{pending--;if(done)return;if(v.kind==='ok')return finish(v);last=v;if(pending===0)finish(v);});
+      timers.push(setTimeout(launch,hedgeMs));};
+    timers.push(setTimeout(()=>finish(last),total));launch();
+  });
+}
+async function reqOnce(params,body,signal){
+  let r;
+  try{
+    if(body) r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body),signal});
+    else r=await fetch(API+'?'+new URLSearchParams(Object.assign({},params,{_:Date.now()})),{signal});
+  }catch(e){return{kind:'net'};}
+  try{return{kind:'ok',data:await r.json()};}catch(e){return signal.aborted?{kind:'net'}:{kind:'busy'};}
+}
+async function get(params){ for(let i=0;i<2;i++){const v=await hedged(s=>reqOnce(params,null,s),6000,4,25000);if(v.kind==='ok')return v.data;} throw new Error('連線逾時'); }
+async function post(body){ const v=await hedged(s=>reqOnce(null,body,s),15000,1,30000); if(v.kind==='ok')return v.data; throw new Error('連線逾時，請確認後再試一次'); }   // 寫入動作不補送，避免重複執行
+
+function toast(t,err){const d=document.createElement('div');d.className='msg'+(err?' err':'');d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),err?5000:2600);}
+function ask(title,html,yes,yesClass){
+  return new Promise(res=>{
+    $('dt').textContent=title;$('db').innerHTML=html;$('dyes').textContent=yes||'確定';$('dyes').className='btn '+(yesClass||'');
+    $('mask').classList.remove('hide');
+    const close=v=>{$('mask').classList.add('hide');$('dyes').onclick=$('dno').onclick=null;res(v);};
+    $('dyes').onclick=()=>close(true);$('dno').onclick=()=>close(false);
+  });
+}
+
+/* ───── 登入 ───── */
+function show(id){['login','deny','main'].forEach(x=>$(x).classList.toggle('hide',x!==id));}
+async function loadOffices(){
+  const sel=$('ao');if(sel.dataset.loaded)return;sel.dataset.loaded='1';
+  let offs=[];try{offs=(await get({action:'adminopts'})).offices||[];}catch(e){}
+  sel.innerHTML='<option value="">請選擇服務處</option>'+offs.map(o=>`<option>${esc(o)}</option>`).join('');
+}
+function showLogin(msg){show('login');$('lerr').textContent=msg||'';loadOffices();}
+async function doLogin(){
+  const name=$('an').value.trim(),office=$('ao').value.trim(),code=$('ap').value.trim();
+  if(!name||!office||!code){$('lerr').textContent='請依序選擇服務處、輸入全名與驗證碼。';return;}
+  const b=$('lgo');b.disabled=true;b.textContent='驗證中…';$('lerr').textContent='';
+  try{
+    const v=await hedged(s=>reqOnce(null,{action:'adminlogin',name,office,code},s),6000,4,25000);
+    const r=v.kind==='ok'?v.data:{ok:false,error:'連線失敗，請稍後再試。'};
+    if(!r.ok){$('lerr').textContent=r.error||'登入失敗';return;}
+    TOKEN=r.token;try{localStorage.setItem('eadm',TOKEN);}catch(e){}
+    $('ap').value='';load();
+  }finally{b.disabled=false;b.textContent='登入';}
+}
+function logout(){TOKEN='';try{localStorage.removeItem('eadm');}catch(e){}showLogin('');}
+$('lgo').onclick=doLogin;$('ap').onkeydown=e=>{if(e.key==='Enter')doLogin();};$('an').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('ap').focus();}};
+$('out').onclick=e=>{e.preventDefault();logout();};$('denyout').onclick=e=>{e.preventDefault();logout();};
+$('rf').onclick=e=>{e.preventDefault();load();};
+
+/* ───── 讀取 ───── */
+async function load(){
+  if(!API){show('deny');$('denymsg').textContent='尚未設定總機網址（config.js）。';return;}
+  if(!TOKEN){showLogin('');return;}
+  try{
+    const [r,x]=await Promise.all([get({action:'c_info',token:TOKEN}),get({action:'c_export',token:TOKEN})]);
+    if(!r.ok){ if(/負責人/.test(r.error||'')){show('deny');$('denymsg').textContent=r.error;return;} if(/登入/.test(r.error||'')){TOKEN='';try{localStorage.removeItem('eadm');}catch(e){} showLogin(r.error);return;} throw new Error(r.error); }
+    I=r;X=x.ok?x:null;show('main');render();
+  }catch(e){ if(I)toast('連線失敗：'+e.message,true); else showLogin('連線失敗：'+e.message); }
+}
+
+/* ───── 畫面 ───── */
+const C=k=>(I.ctrl[k]||{}).v||'';
+function render(){
+  $('upd').textContent=dt(I.now);$('who').textContent=I.me.name+'｜'+I.me.office;
+  const s=I.stats, reh=C('演練模式')==='是', rep=C('回報開放')==='是', pub=C('公開頁')==='開放';
+  const openAt=new Date(C('公開開放時間'));
+  $('kpi').innerHTML=[
+    ['g',s.reported+' / '+s.total,'已回報投開票所'],
+    ['',Number(s.valid).toLocaleString(),'有效票合計（無效 '+Number(s.invalid).toLocaleString()+'）'],
+    [s.open?(reh?'w':'g'):'r',s.open?(reh?'演練中':'公開中'):'未公開','投影頁／查詢頁'],
+    [rep?'g':'r',rep?'收件中':'暫停','志工回報'],
+  ].map(k=>`<div class="kpi ${k[0]}"><b>${esc(k[1])}</b><span>${esc(k[2])}</span></div>`).join('');
+
+  const ok=(c,t,bad)=>`<li>${c?'✅':'⚠️'} ${t}${c?'':' <span class="small" style="color:var(--red)">'+bad+'</span>'}</li>`;
+  $('chk').innerHTML=
+    ok(!reh,'演練模式＝否','目前是「是」：還沒到開放時間就會顯示票數')+
+    ok(rep,'回報開放＝是','目前暫停，志工無法送票')+
+    ok(pub,'公開頁＝開放','目前關閉，投影頁不會顯示票數')+
+    ok(!isNaN(openAt)&&openAt.getHours()===16&&openAt.getMinutes()===0,'公開開放時間＝'+(isNaN(openAt)?'（未設定）':`${openAt.getMonth()+1}/${openAt.getDate()} ${p2(openAt.getHours())}:${p2(openAt.getMinutes())}`),'請確認是否為投票日 16:00')+
+    ok(s.reported===0,'回報已清空（0 所）','目前還有 '+s.reported+' 所資料，正式開票前請清空演練票數');
+
+  const SW=[
+    ['演練模式',['是','否'],'「是」＝不等開放時間，投影頁就顯示票數（畫面會標「演練資料」）。<b>正式開票前務必改「否」。</b>'],
+    ['回報開放',['是','否'],'「否」＝志工頁暫停收件（總部代報不受影響）。'],
+    ['公開頁',['開放','關閉'],'「關閉」＝投影頁、查詢頁一律不顯示票數。'],
+  ];
+  $('sets').innerHTML=SW.map(([k,opts,d])=>`<div class="row"><div class="lab"><b>${k}</b><span class="small">${d}</span></div>
+      <div class="sw">${opts.map((o,i)=>`<button data-k="${k}" data-v="${o}" class="${C(k)===o?'on'+(i?' off':''):''}">${o}</button>`).join('')}</div></div>`).join('')+
+    `<div class="row"><div class="lab"><b>公開開放時間</b><span class="small">非演練模式時，到了這個時間投影頁才開始顯示票數（投票 16:00 結束）。</span></div>
+      <div class="inl"><input type="datetime-local" class="t" id="oat" value="${isNaN(openAt)?'':`${openAt.getFullYear()}-${p2(openAt.getMonth()+1)}-${p2(openAt.getDate())}T${p2(openAt.getHours())}:${p2(openAt.getMinutes())}`}"><button class="btn" data-save="公開開放時間" data-src="oat">儲存</button></div></div>
+    <div class="row" style="display:block"><div class="lab"><b>志工頁提醒</b><span class="small">顯示在志工填票頁最上方的提示文字；留空＝不顯示。</span></div>
+      <textarea class="t" id="vnote" style="margin-top:6px">${esc(C('志工頁提醒'))}</textarea><div class="inl"><button class="btn" data-save="志工頁提醒" data-src="vnote">儲存</button></div></div>`;
+  const ADV=[['標題','投影頁大標題'],['選區說明','投影頁副標'],['應選席次','投影頁「暫列前 N 名」分隔線'],['預設候選人號次','查詢頁預設選哪一位；空白＝不預選'],['後台服務處選單','登入頁的服務處選項，用「、」分隔']];
+  $('adv').innerHTML=ADV.map(([k,d],i)=>`<div class="row"><div class="lab"><b>${k}</b><span class="small">${d}</span></div><div class="inl">`+
+    (k==='預設候選人號次'?`<select class="t" id="adv${i}"><option value="">（不預選）</option>${I.cands.map(c=>`<option value="${c.no}" ${String(c.no)===C(k)?'selected':''}>${c.no} ${esc(c.name)}</option>`).join('')}</select>`
+      :`<input class="t" id="adv${i}" value="${esc(C(k))}" style="width:${k==='應選席次'?'70px':'260px'};max-width:100%">`)+
+    `<button class="btn ghost" data-save="${k}" data-src="adv${i}">儲存</button></div></div>`).join('');
+  document.querySelectorAll('.sw button').forEach(b=>b.onclick=()=>setSwitch(b.dataset.k,b.dataset.v));
+  document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>saveField(b.dataset.save,$(b.dataset.src).value));
+
+  // 票數
+  if(X){
+    const tot={};X.cands.forEach(c=>tot[c.no]=0);X.stations.forEach(st=>{if(st.status==='已回報'&&st.votes)Object.keys(tot).forEach(no=>tot[no]+=Number(st.votes[no]||0));});
+    const sum=Object.values(tot).reduce((a,b)=>a+b,0)||1;
+    const rows=X.cands.slice().sort((a,b)=>tot[b.no]-tot[a.no]);
+    $('votes').innerHTML=`<table><tr><th>名次</th><th>號次・姓名</th><th class="h">政黨</th><th style="text-align:right">得票</th><th style="text-align:right">得票率</th></tr>`+
+      rows.map((c,i)=>`<tr><td>${i+1}</td><td>${c.no} ${esc(c.name)}${c.ours?' <span class="tag t-ok">民進黨提名</span>':''}</td><td class="h">${esc(c.party)}</td><td class="n">${tot[c.no].toLocaleString()}</td><td class="n">${(tot[c.no]/sum*100).toFixed(1)}%</td></tr>`).join('')+'</table>';
+  } else $('votes').innerHTML='<div class="small">票數讀取失敗，請按重新整理。</div>';
+
+  // 管理人員
+  const offs=(C('後台服務處選單')||'').split(/[、,，;；\n]/).map(x=>x.trim()).filter(Boolean);
+  const sel=$('no'),cur=sel.value;sel.innerHTML=offs.map(o=>`<option>${esc(o)}</option>`).join('');if(cur)sel.value=cur;
+  $('adms').innerHTML=`<table><tr><th>全名</th><th>服務處</th><th class="h">手機</th><th>身分</th><th></th></tr>`+
+    I.admins.map(a=>`<tr><td>${esc(a.name)}${a.self?' <span class="small">（你）</span>':''}</td><td>${esc(a.office)}</td><td class="h n" style="text-align:left">${esc(a.phone)}</td>
+      <td>${a.owner?'<span class="tag t-w">負責人</span>':'<span class="tag t-ok">管理員</span>'}</td>
+      <td style="white-space:nowrap">${a.self?'':`<button class="btn ghost" data-own="${a.id}" data-to="${a.owner?0:1}" style="padding:4px 9px;font-size:13px">${a.owner?'取消負責人':'設為負責人'}</button> <button class="btn redg" data-del="${a.id}" style="padding:4px 9px;font-size:13px">刪除</button>`}</td></tr>`).join('')+'</table>';
+  document.querySelectorAll('[data-own]').forEach(b=>b.onclick=()=>setOwner(+b.dataset.own,b.dataset.to==='1'));
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delAdmin(+b.dataset.del));
+  $('lockinfo').textContent='志工或管理人員打錯太多次被暫時鎖住時使用。目前被鎖：'+s.locked+' 筆。';
+
+  $('ops').innerHTML=I.oplog.length?`<table><tr><th>時間</th><th>人員</th><th>動作</th></tr>`+I.oplog.map(o=>`<tr><td class="n" style="text-align:left">${dt(o.t)}</td><td>${esc(o.name)}<span class="small">${o.office?'・'+esc(o.office):''}</span></td><td>${/^(成功|失敗|鎖定中)$/.test(o.result)?'後台登入：'+esc(o.result):esc(o.result)}</td></tr>`).join('')+'</table>':'<div class="small">尚無紀錄。</div>';
+}
+
+/* ───── 動作 ───── */
+async function act(body,okMsg){
+  try{const r=await post(Object.assign({token:TOKEN},body));
+    if(!r.ok){toast(r.error||'操作失敗',true);if(/登入/.test(r.error||''))logout();return null;}
+    if(okMsg)toast(okMsg);await load();return r;
+  }catch(e){toast(e.message,true);return null;}
+}
+const WARN={
+  '演練模式|是':'投影頁、查詢頁會<b>立刻顯示目前的票數</b>（標示「演練資料」）。<br>正式開票當天請勿開啟。',
+  '演練模式|否':'投影頁將依「公開開放時間」才顯示票數。',
+  '回報開放|否':'志工將<b>無法送出票數</b>（總部代報仍可用）。',
+  '回報開放|是':'志工可以開始送出票數。',
+  '公開頁|關閉':'投影頁、查詢頁將<b>不顯示任何票數</b>。',
+  '公開頁|開放':'投影頁、查詢頁恢復顯示（仍受開放時間／演練模式控制）。',
+};
+async function setSwitch(k,v){
+  if(C(k)===v)return;
+  if(!await ask(`把「${k}」改成「${v}」？`,WARN[k+'|'+v]||'',`改成「${v}」`))return;
+  await act({action:'c_set',k,v},`已將「${k}」改成「${v}」`);
+}
+async function saveField(k,v){
+  v=String(v||'').trim();
+  if(k==='公開開放時間'&&!v){toast('請選擇日期時間',true);return;}
+  if(!await ask(`儲存「${k}」？`,`新的內容：<b>${esc(v)||'（空白）'}</b>`,'儲存'))return;
+  await act({action:'c_set',k,v},`已儲存「${k}」`);
+}
+$('nadd').onclick=async()=>{
+  const name=$('na').value.trim(),office=$('no').value,phone=$('np').value.trim(),owner=$('nown').checked;
+  if(!name||!office||!phone){toast('請填全名、服務處與手機號碼',true);return;}
+  if(!await ask('新增管理人員？',`${esc(name)}（${esc(office)}）${owner?'<br><b>並設為負責人（可進控制台）</b>':''}`,'新增'))return;
+  if(await act({action:'c_admin_add',name,office,phone,owner},'已新增 '+name)){$('na').value='';$('np').value='';$('nown').checked=false;}
+};
+async function setOwner(id,owner){
+  const a=I.admins.find(x=>x.id===id);
+  if(!await ask(owner?'設為負責人？':'取消負責人？',`${esc(a.name)}（${esc(a.office)}）${owner?'將可以進入系統控制台，包含清空回報、管理人員等功能。':'將不能再進入系統控制台（總部看板照常可用）。'}`,owner?'設為負責人':'取消負責人'))return;
+  await act({action:'c_admin_owner',id,owner},'已更新');
+}
+async function delAdmin(id){
+  const a=I.admins.find(x=>x.id===id);
+  if(!await ask('刪除管理人員？',`${esc(a.name)}（${esc(a.office)}）將<b>立刻被登出</b>，之後無法再登入總部看板。`,'刪除','red'))return;
+  await act({action:'c_admin_del',id},'已刪除 '+a.name);
+}
+$('unl').onclick=async()=>{
+  if(!await ask('解除登入鎖定？','所有因打錯太多次而被暫時鎖住的志工、管理人員，都可以馬上再試。','解除'))return;
+  await act({action:'c_unlock_login'},'已解除登入鎖定');
+};
+$('clr').onclick=async()=>{
+  const n=I.stats.reported;
+  if(!await ask('清空所有回報？',`目前已回報 <b>${n}</b> 所。<br>按「下一步」會<b>先下載一份備份</b>（各所得票＋回報紀錄），再請你確認。`,'下一步','red'))return;
+  const x=await get({action:'c_export',token:TOKEN}).catch(()=>null);
+  if(!x||!x.ok){toast('備份下載失敗，已取消清空',true);return;}
+  X=x;downloadStations('清空前備份_');downloadLog('清空前備份_');
+  const ok=await ask('最後確認',`備份已下載（請到「下載項目」確認有兩個 CSV 檔）。<br><br>清空後<b>無法復原</b>。請在下面輸入「<b>清空</b>」兩個字：<br><input class="t" id="cfm" style="width:100%;margin-top:8px" autocomplete="off">`,'確定清空','red');
+  if(!ok)return;
+  const v=($('cfm')||{}).value||'';
+  if(v.trim()!=='清空'){toast('沒有輸入「清空」，已取消',true);return;}
+  const r=await act({action:'c_clear',confirm:'清空'});
+  if(r)toast('已清空（清空前 '+r.cleared+' 所）');
+};
+
+/* ───── 下載 CSV（Excel 可直接開）───── */
+function csv(name,rows){
+  const s='﻿'+rows.map(r=>r.map(x=>{x=x==null?'':String(x);return /[",\n]/.test(x)?'"'+x.replace(/"/g,'""')+'"':x;}).join(',')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv;charset=utf-8'}));
+  const d=new Date();a.download=`${name}${d.getMonth()+1}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}.csv`;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+function downloadStations(pre){
+  const cs=X.cands;
+  csv((pre||'')+'各所得票_',[['所號','所屬里','名稱','責任議員','狀態','首次回報','最後回報','回報人','更正次數','有效票','無效票','自報有效票','旗標'].concat(cs.map(c=>c.no+' '+c.name))]
+    .concat(X.stations.map(s=>[s.sid,s.li,s.name,s.team,s.status,full(s.first),full(s.last),s.who,s.cnt,s.valid,s.invalid,s.declared,s.flags].concat(cs.map(c=>s.votes?s.votes[c.no]:'')))));
+}
+function downloadLog(pre){
+  const cs=X.cands;
+  csv((pre||'')+'回報紀錄_',[['時間','所號','回報人','類型','有效票','無效票','自報有效票','旗標'].concat(cs.map(c=>c.no+' '+c.name))]
+    .concat(X.log.map(l=>[full(l.t),l.sid,l.who,l.type,l.valid,l.invalid,l.declared,l.flags].concat(cs.map(c=>l.votes?l.votes[c.no]:'')))));
+}
+$('dl1').onclick=()=>{if(X)downloadStations();else toast('資料還沒載入',true);};
+$('dl2').onclick=()=>{if(X)downloadLog();else toast('資料還沒載入',true);};
+
+load();
+})();
+</script>
+</body>
+</html>

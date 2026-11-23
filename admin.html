@@ -196,7 +196,7 @@ function render(){
   const S=TEAM?ALL.filter(s=>(s.team||'(未分)')===TEAM):ALL, done=S.filter(s=>s.done), miss=S.filter(s=>!s.done);
   const flag=S.filter(s=>s.done&&(s.flags||s.cnt>0));
   const noRep=S.filter(s=>!s.rep.length);
-  const mm=D.me||ME; $('who').innerHTML=mm?`${esc(mm.name)}｜${esc(mm.office)}　<a href="#" id="out">登出</a>`:''; if($('out'))$('out').onclick=e=>{e.preventDefault();logout();};
+  const mm=D.me||ME; $('who').innerHTML=mm?`${esc(mm.name)}｜${esc(mm.office)}　${mm.owner?'<a href="console.html" style="font-weight:700">⚙ 系統控制台</a>　':''}<a href="#" id="out">登出</a>`:''; if($('out'))$('out').onclick=e=>{e.preventDefault();logout();};
   $('st').textContent=D.status==='open'?'民眾頁：開放中':'民眾頁：未開放';
   $('st').className='pillw '+(D.status==='open'?'t-ok':'t-w');
   if(D.rehearsal)$('st').textContent+='（演練模式）';
