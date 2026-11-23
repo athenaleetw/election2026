@@ -180,12 +180,13 @@ async function load(){
     failing=true; if(!D){ $('root').innerHTML='<div class="card empty">暫時連不上資料，請稍後重新整理。<br><br><button class="seg on" onclick="location.reload()">重新整理</button></div>'; }
     pill();
   }
-  clearTimeout(TM); TM=setTimeout(load, DEMO?4000:(document.hidden?60000:(26000+Math.random()*8000)));   // 切到背景放慢
+  clearTimeout(TM); TM=setTimeout(load, DEMO?4000:(D&&D.status==='paused')?600000:(document.hidden?60000:(26000+Math.random()*8000)));   // 切到背景放慢；總部暫停時每 10 分鐘
 }
 let TM=null;
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&D){ clearTimeout(TM); load(); } });   // 切回來馬上更新
 function pill(){
   const p=$('pill'); if(!D){return}
+  if(D.status==='paused'){p.classList.remove('stale');$('pilltxt').textContent='已暫停更新';return;}
   if(D.status==='closed'){p.classList.remove('stale');$('pilltxt').textContent='尚未開放';return;}
   if(failing||Date.now()-lastOk>90000){p.classList.add('stale');$('pilltxt').textContent='連線不穩，目前顯示 '+hm(lastOk)+' 的資料';}
   else{p.classList.remove('stale');$('pilltxt').textContent='即時更新　資料時間 '+hms(D.updated);}
@@ -212,6 +213,7 @@ function render(){
   $('title').textContent=D.title||'開票即時'; $('sub').textContent=D.sub||'';
   document.title=(D.title||'開票即時');
   pill();
+  if(D.status==='paused'){ $('root').innerHTML='<div class="card closed"><div style="font-size:44px">⏸️</div><div class="t">總部已暫停本頁更新</div><div class="muted" style="color:var(--mute)">恢復後會自動重新連線（最慢 10 分鐘）</div><button class="seg on" style="margin-top:14px" onclick="location.reload()">立即重新連線</button></div>'; return; }
   if(D.status==='closed'){ renderClosed(); return; }
   if(!$('prog')){ buildShell(); }
   renderProg(); renderRank(); renderTrend(); renderQuery();

@@ -237,7 +237,7 @@ async function load(){
 }
 
 /* ───── 畫面 ───── */
-const C=k=>(I.ctrl[k]||{}).v||'';
+const C=k=>(I.ctrl[k]||{}).v||(k==='投影頁連線'?'開啟':'');
 function render(){
   $('upd').textContent=dt(I.now);$('who').textContent=I.me.name+'｜'+I.me.office;
   const s=I.stats, reh=C('演練模式')==='是', rep=C('回報開放')==='是', pub=C('公開頁')==='開放';
@@ -250,24 +250,34 @@ function render(){
   ].map(k=>`<div class="kpi ${k[0]}"><b>${esc(k[1])}</b><span>${esc(k[2])}</span></div>`).join('');
 
   const ok=(c,t,bad)=>`<li>${c?'✅':'⚠️'} ${t}${c?'':' <span class="small" style="color:var(--red)">'+bad+'</span>'}</li>`;
+  const sch=(k,v)=>I.schedules.find(x=>x.k===k&&x.v===v);
+  const hm=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${p2(d.getHours())}:${p2(d.getMinutes())}`;};
+  const schOk=(cur,k,v,t,bad)=>{ if(cur)return ok(true,t,''); const x=sch(k,v); return x?ok(true,`${k}：已排程 ${hm(x.at)} 自動改成「${v}」`,''):ok(false,t,bad); };
   $('chk').innerHTML=
-    ok(!reh,'演練模式＝否','目前是「是」：還沒到開放時間就會顯示票數')+
-    ok(rep,'回報開放＝是','目前暫停，志工無法送票')+
+    schOk(!reh,'演練模式','否','演練模式＝否','目前是「是」：還沒到開放時間就會顯示票數')+
+    schOk(rep,'回報開放','是','回報開放＝是','目前暫停，志工無法送票')+
     ok(pub,'公開頁＝開放','目前關閉，投影頁不會顯示票數')+
     ok(!isNaN(openAt)&&openAt.getHours()===16&&openAt.getMinutes()===0,'公開開放時間＝'+(isNaN(openAt)?'（未設定）':`${openAt.getMonth()+1}/${openAt.getDate()} ${p2(openAt.getHours())}:${p2(openAt.getMinutes())}`),'請確認是否為投票日 16:00')+
-    ok(s.reported===0,'回報已清空（0 所）','目前還有 '+s.reported+' 所資料，正式開票前請清空演練票數');
+    ok(s.reported===0,'回報已清空（0 所）','目前還有 '+s.reported+' 所資料，正式開票前請清空演練票數')+
+    schOk(C('投影頁連線')!=='暫停','投影頁連線','開啟','投影頁連線＝開啟','目前暫停中，投影頁不會更新');
 
   const SW=[
     ['演練模式',['是','否'],'「是」＝不等開放時間，投影頁就顯示票數（畫面會標「演練資料」）。<b>正式開票前務必改「否」。</b>'],
     ['回報開放',['是','否'],'「否」＝志工頁暫停收件（總部代報不受影響）。'],
     ['公開頁',['開放','關閉'],'「關閉」＝投影頁、查詢頁一律不顯示票數。'],
+    ['投影頁連線',['開啟','暫停'],'「暫停」＝<b>所有</b>開著的投影頁、查詢頁停止自動更新（最慢 30 秒內生效），省流量。志工頁、總部看板不受影響。恢復後最慢 10 分鐘自動重連。'],
   ];
   $('sets').innerHTML=SW.map(([k,opts,d])=>`<div class="row"><div class="lab"><b>${k}</b><span class="small">${d}</span></div>
       <div class="sw">${opts.map((o,i)=>`<button data-k="${k}" data-v="${o}" class="${C(k)===o?'on'+(i?' off':''):''}">${o}</button>`).join('')}</div></div>`).join('')+
     `<div class="row"><div class="lab"><b>公開開放時間</b><span class="small">非演練模式時，到了這個時間投影頁才開始顯示票數（投票 16:00 結束）。</span></div>
       <div class="inl"><input type="datetime-local" class="t" id="oat" value="${isNaN(openAt)?'':`${openAt.getFullYear()}-${p2(openAt.getMonth()+1)}-${p2(openAt.getDate())}T${p2(openAt.getHours())}:${p2(openAt.getMinutes())}`}"><button class="btn" data-save="公開開放時間" data-src="oat">儲存</button></div></div>
     <div class="row" style="display:block"><div class="lab"><b>志工頁提醒</b><span class="small">顯示在志工填票頁最上方的提示文字；留空＝不顯示。</span></div>
-      <textarea class="t" id="vnote" style="margin-top:6px">${esc(C('志工頁提醒'))}</textarea><div class="inl"><button class="btn" data-save="志工頁提醒" data-src="vnote">儲存</button></div></div>`;
+      <textarea class="t" id="vnote" style="margin-top:6px">${esc(C('志工頁提醒'))}</textarea><div class="inl"><button class="btn" data-save="志工頁提醒" data-src="vnote">儲存</button></div></div>
+    <div class="row" style="display:block"><div class="lab"><b>⏰ 自動排程</b><span class="small">到了指定時間自動切換開關。時間到後，第一個連進來的請求（志工登入、投影頁更新等）就會執行；被暫停的投影頁最慢 10 分鐘跟上。</span></div>
+      <div style="margin-top:6px">${I.schedules.length?`<table><tr><th>預定時間</th><th>改成</th><th class="h">建立者</th><th></th></tr>${I.schedules.map(x=>`<tr><td>${hm(x.at)}</td><td>${esc(x.k)}＝<b>${esc(x.v)}</b></td><td class="h">${esc(x.by)}</td><td style="text-align:right"><button class="btn redg" data-sdel="${x.id}" style="padding:4px 9px;font-size:13px">取消</button></td></tr>`).join('')}</table>`:'<div class="small">目前沒有排程。</div>'}</div>
+      <div class="inl" style="margin-top:10px"><button class="btn" id="sq">＋ 一鍵排程：11/28 15:50 自動打開「回報開放」與「投影頁連線」</button></div>
+      <div class="inl"><select class="t" id="sk">${['回報開放|是','回報開放|否','投影頁連線|開啟','投影頁連線|暫停','演練模式|否','演練模式|是','公開頁|開放','公開頁|關閉'].map(x=>`<option value="${x}">${x.replace('|','＝')}</option>`).join('')}</select>
+        <input type="datetime-local" class="t" id="sat" value="2026-11-28T15:50"><button class="btn ghost" id="sadd">＋ 新增排程</button></div></div>`;
   const ADV=[['標題','投影頁大標題'],['選區說明','投影頁副標'],['應選席次','投影頁「暫列前 N 名」分隔線'],['預設候選人號次','查詢頁預設選哪一位；空白＝不預選'],['後台服務處選單','登入頁的服務處選項，用「、」分隔']];
   $('adv').innerHTML=ADV.map(([k,d],i)=>`<div class="row"><div class="lab"><b>${k}</b><span class="small">${d}</span></div><div class="inl">`+
     (k==='預設候選人號次'?`<select class="t" id="adv${i}"><option value="">（不預選）</option>${I.cands.map(c=>`<option value="${c.no}" ${String(c.no)===C(k)?'selected':''}>${c.no} ${esc(c.name)}</option>`).join('')}</select>`
@@ -275,6 +285,8 @@ function render(){
     `<button class="btn ghost" data-save="${k}" data-src="adv${i}">儲存</button></div></div>`).join('');
   document.querySelectorAll('.sw button').forEach(b=>b.onclick=()=>setSwitch(b.dataset.k,b.dataset.v));
   document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>saveField(b.dataset.save,$(b.dataset.src).value));
+  document.querySelectorAll('[data-sdel]').forEach(b=>b.onclick=()=>delSched(+b.dataset.sdel));
+  $('sq').onclick=quickSched; $('sadd').onclick=addSched;
 
   // 票數
   if(X){
@@ -313,6 +325,8 @@ const WARN={
   '回報開放|是':'志工可以開始送出票數。',
   '公開頁|關閉':'投影頁、查詢頁將<b>不顯示任何票數</b>。',
   '公開頁|開放':'投影頁、查詢頁恢復顯示（仍受開放時間／演練模式控制）。',
+  '投影頁連線|暫停':'<b>所有</b>開著的投影頁、查詢頁會顯示「總部已暫停本頁更新」，並停止自動更新（最慢 30 秒內生效）。<br>開票期間請勿暫停。',
+  '投影頁連線|開啟':'所有投影頁、查詢頁最慢 10 分鐘內自動恢復；電視前也可按「立即重新連線」。',
 };
 async function setSwitch(k,v){
   if(C(k)===v)return;
@@ -324,6 +338,26 @@ async function saveField(k,v){
   if(k==='公開開放時間'&&!v){toast('請選擇日期時間',true);return;}
   if(!await ask(`儲存「${k}」？`,`新的內容：<b>${esc(v)||'（空白）'}</b>`,'儲存'))return;
   await act({action:'c_set',k,v},`已儲存「${k}」`);
+}
+async function addSched(){
+  const [k,v]=$('sk').value.split('|'),at=$('sat').value;
+  if(!at){toast('請選擇時間',true);return;}
+  const d=new Date(at);
+  if(!await ask('新增自動排程？',`<b>${d.getMonth()+1}/${d.getDate()} ${p2(d.getHours())}:${p2(d.getMinutes())}</b> 自動把「${esc(k)}」改成「<b>${esc(v)}</b>」。`,'新增排程'))return;
+  await act({action:'c_sched_add',k,v,at},'已新增排程');
+}
+async function quickSched(){
+  if(!await ask('一鍵排程','<b>11/28 15:50</b> 自動：<br>・回報開放＝<b>是</b>（志工可以送票）<br>・投影頁連線＝<b>開啟</b>（投影頁、查詢頁恢復更新）<br><br>投票 16:00 結束，第一批開票結果約 16:30 以後進來。','建立排程'))return;
+  const msg=[];
+  for(const [k,v] of [['回報開放','是'],['投影頁連線','開啟']]){
+    try{const r=await post({token:TOKEN,action:'c_sched_add',k,v,at:'2026-11-28T15:50'});msg.push(k+(r.ok?'：已排程':'：'+(r.error||'失敗')));}catch(e){msg.push(k+'：'+e.message);}
+  }
+  toast(msg.join('　'));await load();
+}
+async function delSched(id){
+  const x=I.schedules.find(s=>s.id===id);
+  if(!await ask('取消排程？',`${esc(x.k)}＝${esc(x.v)}（${new Date(x.at).toLocaleString('zh-TW',{hour12:false})}）`,'取消排程','red'))return;
+  await act({action:'c_sched_del',id},'已取消排程');
 }
 $('nadd').onclick=async()=>{
   const name=$('na').value.trim(),office=$('no').value,phone=$('np').value.trim(),owner=$('nown').checked;
