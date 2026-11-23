@@ -26,25 +26,29 @@ header.top .in{max-width:560px;margin:0 auto}
 .banner{margin:12px 0;padding:10px 12px;border-radius:10px;font-size:14px}
 .b-amb{background:var(--ambbg);color:var(--amb)} .b-red{background:var(--redbg);color:var(--red)} .b-g{background:var(--gbg);color:var(--g2)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden}
-.row{display:grid;grid-template-columns:54px 1fr 124px;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.row>.no{flex:0 0 auto;width:max(54px,1.92em)}
+.row>div:not(.no){flex:1000 1 4.5em;min-width:0}   /* 姓名欄吃掉同一行剩餘空間 → 正常字體時填票格維持原本 124px */
+.row>input.n{flex:1 0 124px;flex-basis:max(124px,4.43em);max-width:100%}   /* 正常＝同一行右側約 124px；字放大塞不下時自動換到下一行、佔滿寬度 */
 .row:first-child{border-top:0}
 .no{font-size:28px;font-weight:800;text-align:center;color:var(--g2);font-variant-numeric:tabular-nums}
-.nm{font-size:20px;font-weight:700;line-height:1.2}
+.nm{font-size:20px;font-weight:700;line-height:1.2;overflow-wrap:anywhere}
 .pt{font-size:12px;color:var(--mute)}
-input.n{width:100%;height:56px;font-size:28px;font-weight:700;text-align:right;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
+input.n{width:100%;height:auto;min-height:max(56px,2em);font-size:28px;font-weight:700;text-align:right;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none}
 input.n:focus{outline:none;border-color:var(--g);background:var(--card)}
 .row.filled input.n{border-color:var(--g)}
 .extra{padding:12px}
 .extra label{display:block;font-size:15px;font-weight:600;margin:8px 0 4px}
 .extra .hint{font-size:12.5px;color:var(--mute);font-weight:400}
-.extra input{height:48px;font-size:22px}
-.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:6}
-.bar .in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
-.sum{flex:1;font-size:13px;color:var(--mute)}
-.sum b{display:block;font-size:26px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.extra input{height:auto;min-height:max(48px,2.2em);font-size:22px}
+.bar{font-size:calc(16px * var(--kz,1));position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:6}
+.bar .in{max-width:560px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.sum{flex:1;font-size:calc(13px * var(--kz,1));color:var(--mute)}
+.sum b{display:block;font-size:calc(26px * var(--kz,1));color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
 button{font:inherit;cursor:pointer}
 .btn{min-height:52px;line-height:1.3;padding:8px 18px;border:0;border-radius:12px;background:var(--g);color:#fff;font-size:18px;font-weight:700}
 .btn:disabled{opacity:.5}
+.bar .btn{font-size:calc(18px * var(--kz,1))}
 .btn.ghost{background:transparent;color:var(--g2);border:2px solid var(--g)}
 .btn.block{width:100%}
 .btn.warn{background:#b9770e}
@@ -55,19 +59,21 @@ button{font:inherit;cursor:pointer}
 .pk .pn{flex:1;font-size:17px;font-weight:700;line-height:1.3}
 .pk .pn small{display:block;font-size:12.5px;color:var(--mute);font-weight:400}
 .pk .st{font-size:13px;font-weight:700;border-radius:8px;padding:3px 9px;white-space:nowrap}
+.pk{flex-wrap:wrap}
+.pk .pn{min-width:0;overflow-wrap:anywhere}
 .pk .st.ok{background:var(--gbg);color:var(--g2)} .pk .st.no{background:var(--redbg);color:var(--red)} .pk .st.lk{background:var(--line);color:var(--ink)}
 /* 自製數字鍵盤（固定在底部） */
 .pad{max-width:560px;margin:0 auto}
 .bar.padopen .in{display:none}
-.pad .lab{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute);margin-bottom:6px}
+.pad .lab{display:flex;align-items:center;gap:10px;font-size:calc(14px * var(--kz,1));color:var(--mute);margin-bottom:6px}
 .pad .lab #padlab{flex:1;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pad .lab .ps b{font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums}
-.pad .lab button{background:none;border:0;color:var(--g2);font-size:14px;font-weight:700;padding:4px 6px}
-.pad .keys{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,48px);gap:7px;user-select:none;-webkit-user-select:none}
-.pad .keys button{border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-size:28px;font-weight:700;touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:0}
+.pad .lab .ps b{font-size:calc(18px * var(--kz,1));color:var(--ink);font-variant-numeric:tabular-nums}
+.pad .lab button{background:none;border:0;color:var(--g2);font-size:calc(14px * var(--kz,1));font-weight:700;padding:4px 6px}
+.pad .keys{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,minmax(48px,auto));gap:7px;user-select:none;-webkit-user-select:none}
+.pad .keys button{border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-size:calc(28px * var(--kz,1));font-weight:700;touch-action:manipulation;-webkit-tap-highlight-color:transparent;padding:0;min-height:1.7em}
 .pad .keys button:active{background:var(--gbg);border-color:var(--g)}
-.pad .keys .fn{font-size:17px;color:var(--mute)}
-.pad .keys .nx{grid-column:4;grid-row:3 / span 2;background:var(--g);color:#fff;font-size:20px;border-color:var(--g)}
+.pad .keys .fn{font-size:calc(17px * var(--kz,1));color:var(--mute)}
+.pad .keys .nx{grid-column:4;grid-row:3 / span 2;background:var(--g);color:#fff;font-size:calc(20px * var(--kz,1));border-color:var(--g)}
 .pad .keys .nx:active{background:var(--g2)}
 .pad .keys .z{grid-column:1 / span 3}
 input.n[readonly]{caret-color:transparent;cursor:pointer}
@@ -83,8 +89,10 @@ input.n.act{border-color:var(--g);background:var(--card);box-shadow:0 0 0 4px rg
 .big h1{margin:10px 0 4px;font-size:26px}
 .muted{color:var(--mute);font-size:14px}
 .codebox{padding:20px 4px}
-.codebox input{width:100%;height:56px;font-size:26px;text-align:center;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+.codebox input{width:100%;height:auto;min-height:max(56px,2.15em);line-height:1.2;font-size:26px;text-align:center;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
 .hide{display:none!important}
+html.bt header.top{position:static}   /* 字放大時：標題列跟著捲走 */
+html.bt .codebox input::placeholder{font-size:.6em}
 .err{color:var(--red);font-weight:600;margin:10px 0}
 .demo{background:#b9770e;color:#fff;text-align:center;font-size:13px;padding:4px}
 .hbtns{display:flex;flex-wrap:wrap;gap:8px}
@@ -384,7 +392,7 @@ function scrollToAct(){
   setTimeout(()=>{
     if(!ACT)return;
     const box=(ACT.closest('.row')||ACT.closest('.extra')).getBoundingClientRect();
-    const barTop=$('bar').getBoundingClientRect().top, hdr=document.querySelector('header.top').offsetHeight;
+    const barTop=$('bar').getBoundingClientRect().top, hh=document.querySelector('header.top'), hdr=getComputedStyle(hh).position==='sticky'?hh.offsetHeight:0;
     if(box.bottom>barTop-8) window.scrollBy(0,box.bottom-barTop+16);
     else if(box.top<hdr+8) window.scrollBy(0,box.top-hdr-16);
   },30);
@@ -521,6 +529,18 @@ function renderDone(r){
   if($('listst'))$('listst').onclick=()=>renderPicker(false);
 }
 
+/* 偵測手機系統字體放大倍數：放大 ≥1.25 倍＝長輩模式（標題列不固定、鍵盤與送出列字最多 1.2 倍） */
+(function(){
+  try{
+    const p=document.createElement('span');
+    p.style.cssText='position:absolute;visibility:hidden;left:-999px;top:0;font-size:100px;line-height:1;white-space:nowrap';
+    p.textContent='0';document.body.appendChild(p);
+    const r=Math.max(p.getBoundingClientRect().height/100,parseFloat(getComputedStyle(p).fontSize)/100)||1;p.remove();
+    window.__textZoom=r;
+    if(r>=1.25)document.documentElement.classList.add('bt');
+    document.documentElement.style.setProperty('--kz',String(Math.min(1,1.2/r)));
+  }catch(e){}
+})();
 boot();
 })();
 </script>
