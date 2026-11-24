@@ -138,8 +138,12 @@ details summary{cursor:pointer;color:var(--g);font-weight:700;margin-top:8px}
   <div class="sec danger">
     <h2 style="color:var(--red)">⚠ 危險操作</h2>
     <div class="row">
-      <div class="lab"><b>清空所有回報</b><span class="small">清掉全部投開票所的票數與回報紀錄（名冊、設定、管理人員不受影響）。演練結束、正式開票前使用。<b>按下後會先自動下載一份備份。</b></span></div>
+      <div class="lab"><b>清空所有回報</b><span class="small">清掉全部投開票所的票數與回報紀錄（名冊、設定、管理人員不受影響）。演練結束、正式開票前使用。<b>清空前系統會自動在伺服器存一份備份</b>（手機也能操作）。</span></div>
       <button class="btn red" id="clr">清空所有回報</button>
+    </div>
+    <div class="row" style="display:block">
+      <div class="lab"><b>清空前的備份</b><span class="small">每次清空前自動保存（最近 20 份）。下載請用電腦（手機／LINE 可能無法下載檔案）。</span></div>
+      <div id="bks" style="margin-top:6px"></div>
     </div>
     <div class="row">
       <div class="lab"><b>解除登入鎖定</b><span class="small" id="lockinfo">志工或管理人員打錯太多次被暫時鎖住時使用。</span></div>
@@ -306,6 +310,8 @@ function render(){
       <td style="white-space:nowrap">${a.self?'':`<button class="btn ghost" data-own="${a.id}" data-to="${a.owner?0:1}" style="padding:4px 9px;font-size:13px">${a.owner?'取消負責人':'設為負責人'}</button> <button class="btn redg" data-del="${a.id}" style="padding:4px 9px;font-size:13px">刪除</button>`}</td></tr>`).join('')+'</table>';
   document.querySelectorAll('[data-own]').forEach(b=>b.onclick=()=>setOwner(+b.dataset.own,b.dataset.to==='1'));
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delAdmin(+b.dataset.del));
+  $('bks').innerHTML=I.backups.length?`<table><tr><th>清空時間</th><th>清空前</th><th class="h">操作人</th><th></th></tr>${I.backups.map(b=>`<tr><td>${dt(b.t)}</td><td>${b.reported} 所</td><td class="h">${esc(b.by)}</td><td style="text-align:right;white-space:nowrap"><button class="btn ghost" data-bk="${b.id}" style="padding:4px 9px;font-size:13px">⬇ 下載</button></td></tr>`).join('')}</table>`:'<div class="small">尚無備份。</div>';
+  document.querySelectorAll('[data-bk]').forEach(b=>b.onclick=()=>dlBackup(+b.dataset.bk));
   $('lockinfo').textContent='志工或管理人員打錯太多次被暫時鎖住時使用。目前被鎖：'+s.locked+' 筆。';
 
   $('ops').innerHTML=I.oplog.length?`<table><tr><th>時間</th><th>人員</th><th>動作</th></tr>`+I.oplog.map(o=>`<tr><td class="n" style="text-align:left">${dt(o.t)}</td><td>${esc(o.name)}<span class="small">${o.office?'・'+esc(o.office):''}</span></td><td>${/^(成功|失敗|鎖定中)$/.test(o.result)?'後台登入：'+esc(o.result):esc(o.result)}</td></tr>`).join('')+'</table>':'<div class="small">尚無紀錄。</div>';
@@ -381,11 +387,7 @@ $('unl').onclick=async()=>{
 };
 $('clr').onclick=async()=>{
   const n=I.stats.reported;
-  if(!await ask('清空所有回報？',`目前已回報 <b>${n}</b> 所。<br>按「下一步」會<b>先下載一份備份</b>（各所得票＋回報紀錄），再請你確認。`,'下一步','red'))return;
-  const x=await get({action:'c_export',token:TOKEN}).catch(()=>null);
-  if(!x||!x.ok){toast('備份下載失敗，已取消清空',true);return;}
-  X=x;downloadStations('清空前備份_');downloadLog('清空前備份_');
-  const ok=await ask('最後確認',`備份已下載（請到「下載項目」確認有兩個 CSV 檔）。<br><br>清空後<b>無法復原</b>。請在下面輸入「<b>清空</b>」兩個字：<br><input class="t" id="cfm" style="width:100%;margin-top:8px" autocomplete="off">`,'確定清空','red');
+  const ok=await ask('清空所有回報？',`目前已回報 <b>${n}</b> 所。清空前系統會<b>自動在伺服器存一份備份</b>（可在下方「清空前的備份」用電腦下載）。<br><br>清空後畫面上的票數會全部歸零。請在下面輸入「<b>清空</b>」兩個字：<br><input class="t" id="cfm" style="width:100%;margin-top:8px" autocomplete="off">`,'確定清空','red');
   if(!ok)return;
   const v=($('cfm')||{}).value||'';
   if(v.trim()!=='清空'){toast('沒有輸入「清空」，已取消',true);return;}
@@ -409,6 +411,13 @@ function downloadLog(pre){
   const cs=X.cands;
   csv((pre||'')+'回報紀錄_',[['時間','所號','回報人','類型','有效票','無效票','自報有效票','旗標'].concat(cs.map(c=>c.no+' '+c.name))]
     .concat(X.log.map(l=>[full(l.t),l.sid,l.who,l.type,l.valid,l.invalid,l.declared,l.flags].concat(cs.map(c=>l.votes?l.votes[c.no]:'')))));
+}
+async function dlBackup(id){
+  try{const b=await get({action:'c_backup',token:TOKEN,id});
+    if(!b.ok){toast(b.error||'讀取備份失敗',true);return;}
+    const keep=X;X=b;const d=new Date(b.t);const tag=`備份${d.getMonth()+1}${p2(d.getDate())}_${p2(d.getHours())}${p2(d.getMinutes())}_`;
+    downloadStations(tag);downloadLog(tag);X=keep;
+  }catch(e){toast(e.message,true);}
 }
 $('dl1').onclick=()=>{if(X)downloadStations();else toast('資料還沒載入',true);};
 $('dl2').onclick=()=>{if(X)downloadLog();else toast('資料還沒載入',true);};
