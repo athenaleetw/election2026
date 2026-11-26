@@ -54,20 +54,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","
 .body{position:absolute;left:0;right:0;top:62px;bottom:0}
 .item{position:absolute;left:14px;right:14px;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
 /* 我方卡片 */
-.card{height:188px;border-radius:18px;background:linear-gradient(135deg,var(--ps),#f4f1e8);border:2px solid var(--pl);padding:16px 24px;display:flex;flex-direction:column;justify-content:space-between}
+.card{height:179px;border-radius:18px;background:linear-gradient(135deg,var(--ps),#f4f1e8);border:2px solid var(--pl);padding:12px 24px;display:flex;flex-direction:column;justify-content:space-between}
 .card.in{border-color:var(--gold);box-shadow:0 0 0 2px rgba(196,154,44,.22) inset}
 .c1{display:flex;align-items:center;gap:20px}
+.c1 .bd,.c1 .who{transform:translateY(9px)} /* 編號＋姓名＋黨名往下靠近進度條 */
 .bd{min-width:84px;height:84px;border-radius:20px;background:var(--pc);color:#fff;font-size:54px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 8px}
-.nm{font-size:62px;font-weight:900;line-height:1;letter-spacing:2px}
+.nm{font-size:62px;font-weight:900;line-height:1;letter-spacing:2px;white-space:nowrap}
 .pt{font-size:22px;color:var(--pd);font-weight:700;margin-top:6px}
-.rkbox{margin-left:auto;text-align:right}
-.votes{font-size:84px;font-weight:900;line-height:1;color:var(--ink)}
-.share{font-size:28px;color:var(--pd);font-weight:800;margin-top:2px}
+.rkbox{margin-left:auto;display:flex;align-items:center;gap:24px}
+.votes{font-size:76px;font-weight:900;line-height:1;color:var(--ink)}
+.sh{text-align:right;color:var(--pd);min-width:140px}
+.shl{font-size:22px;font-weight:800;line-height:1.1;letter-spacing:2px}
+.share{font-size:44px;font-weight:900;line-height:1;margin-top:4px}
 .c2{display:flex;align-items:center;gap:18px}
 .tr{flex:1;height:24px;border-radius:99px;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--pl);overflow:hidden}
 .tr i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--pl),var(--pc));transition:width 1s}
-.rk{font-size:30px;font-weight:800;white-space:nowrap;min-width:230px;text-align:right}
-.rk b{font-size:38px}
+.rk{font-size:36px;font-weight:800;white-space:nowrap;min-width:270px;line-height:1;display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.rk b{font-size:52px;line-height:1}
 .rk.in{color:var(--goldtxt)} .rk.out{color:var(--mute)}
 /* 其他列 */
 .orow{height:56px;border-radius:12px;background:var(--panel2);display:flex;align-items:center;gap:14px;padding:0 18px}
@@ -173,14 +176,14 @@ function demoPayload(){
 
 /* 建立元素（每位候選人一個，之後只更新內容與位置） */
 let D=null,els=null,lastOk=0,failing=false;
-const PL=$('plb'),PR=$('prb'),CH=188,CG=12,RH=56,RG=4;
+const PL=$('plb'),PR=$('prb'),CH=179,CG=14,RH=56,RG=4;
 function build(){
   PL.innerHTML='';PR.innerHTML='';els={};
   D.cands.forEach(c=>{
     const e=document.createElement('div');e.className='item '+pcls(c.party);
     if(c.ours){
-      e.innerHTML=`<div class="card"><div class="c1"><div class="bd">${c.no}</div><div><div class="nm">${esc(c.name)}</div><div class="pt">${emb(c.party)}${esc(/民進/.test(c.party)?'民主進步黨':c.party)}</div></div>
-        <div class="rkbox"><div class="votes num">0</div><div class="share num">0.0%</div></div></div>
+      e.innerHTML=`<div class="card"><div class="c1"><div class="bd">${c.no}</div><div class="who"><div class="nm">${esc(c.name)}</div><div class="pt">${emb(c.party)}${esc(/民進/.test(c.party)?'民主進步黨':c.party)}</div></div>
+        <div class="rkbox"><div class="votes num">0</div><div class="sh"><div class="shl">得票率</div><div class="share num">0.0%</div></div></div></div>
         <div class="c2"><div class="tr"><i></i></div><div class="rk"></div></div></div>`;
       PL.appendChild(e);
     }else{
@@ -221,7 +224,7 @@ function render(){
   sorted.forEach((x,idx)=>{
     const c=x.c,e=els[c.no],inSeat=any&&idx<seats;
     const pos=c.ours?li++:ri++;
-    e.style.transform=`translateY(${c.ours?pos*(CH+CG):pos*(RH+RG)}px)`;
+    e.style.transform=`translateY(${c.ours?CG+pos*(CH+CG):pos*(RH+RG)}px)`;
     e.querySelector('i').style.width=(x.v/max*100)+'%';
     const share=D.valid?x.v/D.valid*100:0;
     if(c.ours){
